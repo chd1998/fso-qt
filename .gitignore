@@ -1,0 +1,65 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+*.ipch
+*.db
+
+
+# Fortran module files
+*.mod
+*.smod
+
+
+# Executables
+*.exe
+*.out
+*.app
+
+#others
+*.ilk
+*.pdb
+*.tlog
+*.lastbuildstate
+debug*/
+release*/
+build*/
+ipch*/
+*.7z
+*.zip
+*/.vs/
+*.dll
+
+#Qt files
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.stash
+
+#vs files
+*.sln
+*.vcxproj
+*.vcxproj.*

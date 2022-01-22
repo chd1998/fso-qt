@@ -1,0 +1,338 @@
+#include "gpsGUI.h"
+#include "QDebug"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    readTimer = new QTimer(this);
+    //    connect(ui->searchButton,SIGNAL(clicked()),this,SLOT(on_searchButton_clicked()));     //ui上使用槽后会自动connect,不用再connect，否则会链接两遍
+    //    connect(ui->openComButton,SIGNAL(clicked()),this,SLOT(on_openComButton_clicked()));
+    connect(readTimer,SIGNAL(timeout()),this,SLOT(readData()));
+    setFixedSize(this->width(), this->height());
+    this->setWindowTitle("GPS for Site Searching (Ver. 0.0.1)");
+    //this->setWindowIcon(QIcon(":/earth.jpg"));
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+//自动搜索并设置端口号
+void MainWindow::on_searchButton_clicked()
+{
+    foreach(const QSerialPortInfo &protInformation, QSerialPortInfo::availablePorts())//遍历
+    {
+        ui->comInformationTextEdit -> clear(); //下方数据栏清空
+        ui->comComboBox -> clear();           //串口下拉菜单栏清空
+        QStringList comlist;                  //定义一个comlist存protInformation里的portName
+        comlist << protInformation.portName();
+        ui->comComboBox->addItems(comlist);   //将comlist里的内容传给ui上的comComboBox
+        ui->boteComboBox->setCurrentText("9600");
+        //       ui->comComboBox->addItems(ProtInfomation.portName());
+        ui->comStatusLabel->setText(protInformation.portName().append(" Available..."));//在comStatusLabel显示可以使用的端口名字,append函数是用来追加元素到QList容器中
+        ui->comInformationTextEdit->append(protInformation.portName()+" "+protInformation.description()+" "+protInformation.manufacturer());
+        //ui->comInformationTextEdit->append(protInformation.description());
+        //ui->comInformationTextEdit->append(protInformation.manufacturer());
+    }
+}
+
+//打开串口并初始化按钮和文字
+void MainWindow::on_openComButton_clicked()
+{
+
+    if(ui->openComButton->text()==tr("Open"))      //如果openComButton上的字符为“打开串口”
+    {
+        serialPortset = new QSerialPort;
+        serialPortset->setPortName(ui->comComboBox->currentText());//QSerialPort读取串口信息serialPortset，并将串口comComboBox的名称设置为当前找到的串口名
+        serialPortset->open(QIODevice::ReadWrite);    //打开串口读写功能
+        serialPortset->setBaudRate(ui->boteComboBox->currentText().toInt());//将当前波特率以整形显示在boteComboBox
+        switch (ui->comComboBox->currentText().toInt())
+        {
+        case 8:serialPortset->setDataBits(QSerialPort::Data8);break;  //如果当前comComboBox选择8，则数据解析方案setDataBits选择Data8
+        case 7:serialPortset->setDataBits(QSerialPort::Data7);break;
+        case 6:serialPortset->setDataBits(QSerialPort::Data6);break;
+        case 5:serialPortset->setDataBits(QSerialPort::Data5);break;
+        default:break;
+        }
+
+        switch (ui->checkComboBox->currentIndex())    //校验位选择
+        {
+        case 0:serialPortset->setParity(QSerialPort::NoParity);break;
+        case 1:serialPortset->setParity(QSerialPort::OddParity);break;
+        case 2:serialPortset->setParity(QSerialPort::EvenParity);break;
+        default:break;
+        }
+
+        switch (ui->stopComboBox->currentIndex()) //停止位选择
+        {
+        case 0:serialPortset->setStopBits(QSerialPort::OneStop);break;
+        case 1:serialPortset->setStopBits(QSerialPort::TwoStop);break;
+        default:break;
+        }
+
+        ui->comComboBox->setEnabled(false);      //关闭串口显示
+        ui->boteComboBox->setEnabled(false);     //波特率框不显示
+        ui->dataComboBox->setEnabled(false);     //数据位不显示
+        ui->checkComboBox->setEnabled(false);    //校验位不显示
+        ui->stopComboBox->setEnabled(false);     //停止位不显示
+        ui->openComButton->setText("Close");    //openComButton处改为关闭
+        time_interval=ui->updatelineEdit->text().toUInt();
+        if(time_interval<=0)
+            time_interval=1;
+        readTimer->start(time_interval*1000);
+        ui->openComButton->setText("Close");
+        //qDebug() << " Open ：yes\r\n";
+    }
+    else                               //如果openComButton上的字符为“关闭串口”
+    {
+        serialPortset->clear();       //serialPortset对象数据清空
+        serialPortset->close();       //关闭
+        serialPortset->deleteLater(); //删除缓存
+        ui->comComboBox->setEnabled(true);
+        ui->boteComboBox->setEnabled(true);
+        ui->dataComboBox->setEnabled(true);
+        ui->checkComboBox->setEnabled(true);
+        ui->stopComboBox->setEnabled(true);
+        ui->openComButton->setText("Open");
+
+        readTimer->stop();
+        //        qDebug() << " Close ：yes\r\n";
+    }
+}
+//读取串口数据类型为$GPRMC，可以得到经纬度，日期时间，速度等信息
+void MainWindow::readData()//创建一个readData对象
+{
+    QByteArray GPS_Data = serialPortset->readAll();//读取所有数据存入QByteArray类的对象GPS_Data里
+    QByteArray GPS_Data_2 = GPS_Data;
+    if(!GPS_Data.isEmpty())
+    {
+        ui->gpsPlainTextEdit->appendPlainText(GPS_Data);//大框里显示所有接收数据
+        if(GPS_Data.contains("$GNRMC"))                //如果这串数据中包含$GPRMC（具体百度GPS帧格式，了解接收数据的帧格式）
+        {
+
+            GPS_Data.remove(0,GPS_Data.indexOf("$GNRMC")); //删除数据起始到$GPRMC之间的数据
+            if(GPS_Data.contains("*"))                     //如果剩下的字符中包含*
+            {
+
+                GPS_RMC = GPS_Data.left(GPS_Data.indexOf("*"));//则储存*之前的数据到GPS_EMC，（具体参阅帧格式）。此部分数据即为所需的数据
+                GPS_list<<GPS_RMC.split(',');  //注意为单引号
+                gpsDisplay();
+            }
+
+        }
+        if(GPS_Data_2.contains("$GNGGA"))
+        {
+            GPS_Data_2.remove(0,GPS_Data_2.indexOf("$GNGGA"));
+            if(GPS_Data_2.contains("*"))
+            {
+                GPS_RMC_2 = GPS_Data_2.left(GPS_Data_2.indexOf("*"));
+                GPS_list_2 << GPS_RMC_2.split(',');
+                gpsDisplay_2();
+            }
+        }
+
+    }
+    GPS_list.clear();
+    GPS_list_2.clear();
+    GPS_Data.clear();
+    GPS_Data_2.clear();
+
+}
+//gps显示
+void MainWindow::gpsDisplay()
+{
+    qDebug() << "Send: " << ui->gpsPlainTextEdit->toPlainText();
+    QString lat_str;      //纬度
+    QString lon_str;     //经度
+    QString time_str;          //时间
+    QString alt_str;     //海拔
+    //    QString direction_str;
+    //    QString speed;         //速度
+    //    QString status;        //状态
+    QString date_str;          //日期
+    ui->latitudeLineEdit->setText(latitude(lat_str));//显示纬度
+    ui->longitudeLineEdit->setText(longitude(lon_str));//显示经度
+    ui->timeLineEdit->setText(time(time_str));//显示时间
+    ui->speedLineEdit->setText(GPS_list[7]);//显示速度
+    if(GPS_list[2].contains("A"))
+        ui->statusLineEdit->setText("GPS Valid");//显示状态
+    else
+        ui->statusLineEdit->setText("GPS inValid");
+    ui->dateLineEdit->setText(date(date_str)); //显示日期
+    qDebug() << "$GNRMC";
+    //    ui->directionLineEdit->setText(direction(direction_str));
+}
+//纬度模块
+QString& MainWindow::latitude(QString& lat_str)
+{
+    lat_str.clear();
+    QByteArray lat_data = GPS_list[3];      //详见帧格式
+    float second = lat_data.mid(5,5).toFloat()/10000*60;  //lat_data.mid(5,4)为末尾小数，toInt后变为四位的整数，除以10000再变回小数，乘以60换算为秒
+    QString str = QString::number(second);
+    if(GPS_list[4]=="N")
+        lat_str = ("N")+lat_data.mid(0,2)+(u8"°")+lat_data.mid(2,2)+("\'")+str.mid(0,2)+("\"");
+    else
+        lat_str = ("S")+lat_data.mid(0,2)+(u8"°")+lat_data.mid(2,2)+("\'")+str.mid(0,2)+("\"");
+    return lat_str;
+}
+//经度模块
+QString& MainWindow::longitude(QString& lon_str)
+{
+    lon_str.clear();
+    QByteArray lon_data = GPS_list[5];
+    float second2 = lon_data.mid(6,5).toFloat()/10000*60;
+    QString str2 = QString::number(second2);
+    if(GPS_list[6]=="E")
+        lon_str = ("E")+lon_data.mid(0,3)+(u8"°")+lon_data.mid(2,2)+("\'")+str2.mid(0,2)+("\"");
+    else
+        lon_str = ("W")+lon_data.mid(0,3)+(u8"°")+lon_data.mid(2,2)+("\'")+str2.mid(0,2)+("\"");
+    return lon_str;
+}
+//时间模块
+QString& MainWindow::time(QString& time_str)
+{
+    time_str.clear();
+    QByteArray time_data = GPS_list[1];
+    QString htmp=QString("%1").arg(time_data.mid(0,2).toInt()+8, 2, 10, QLatin1Char('0'));
+    time_str = htmp+(":")+time_data.mid(2,2)+(":")+time_data.mid(4,2);//东八区
+    //time_str = QString::number(time_data.mid(0,2).toInt()+8)+(":")+time_data.mid(2,2)+(":")+time_data.mid(4,2);//东八区
+//    qDebug() << "$GNRMC";
+    return time_str;
+}
+//日期模块
+QString& MainWindow::date(QString& date_str)
+{
+    date_str.clear();
+    QByteArray date_data = GPS_list[9];
+    date_str = ("20")+date_data.mid(4,2)+("-")+date_data.mid(2,2)+("-")+date_data.mid(0,2);
+    return date_str;
+}
+
+//QString& MainWindow::direction(QString& direction_str)//角度模块
+//{
+//    direction_str.clear();
+//    QByteArray direction_data = GPS_list[8];
+//    direction_str = direction_data+("度");
+//    return direction_str;
+//}
+//显示当前可用卫星数
+void MainWindow::gpsDisplay_2()
+{
+    QString satellite_str;
+    QString alt_str;
+    ui->satelliteLineEdit->setText(satellite(satellite_str));
+    ui->altLineEdit->setText(getAlt(alt_str)+"m");
+
+}
+
+//高度模块
+QString& MainWindow::getAlt(QString& alt_str)
+{
+    alt_str.clear();
+    QByteArray alt_data = GPS_list_2[9];
+    alt_str = alt_data.mid(0,6);
+    //qDebug()<<alt_str;
+    return alt_str;
+}
+//卫星模块
+QString& MainWindow::satellite(QString& satellite_str)
+{
+    satellite_str.clear();
+    QByteArray satellite_data = GPS_list_2[7];
+    satellite_str = satellite_data.mid(0,2);
+    return satellite_str;
+}
+
+void MainWindow::on_gpsPlainTextEdit_textChanged()
+{
+    QTextCursor cursor=ui->gpsPlainTextEdit->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    ui->gpsPlainTextEdit->setTextCursor(cursor);
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         #ifndef OPENCV_IMGPROC_HAL_INTERFACE_H
+#define OPENCV_IMGPROC_HAL_INTERFACE_H
+
+//! @addtogroup imgproc_hal_interface
+//! @{
+
+//! @name Interpolation modes
+//! @sa cv::InterpolationFlags
+//! @{
+#define CV_HAL_INTER_NEAREST 0
+#define CV_HAL_INTER_LINEAR 1
+#define CV_HAL_INTER_CUBIC 2
+#define CV_HAL_INTER_AREA 3
+#define CV_HAL_INTER_LANCZOS4 4
+//! @}
+
+//! @name Morphology operations
+//! @sa cv::MorphTypes
+//! @{
+#define CV_HAL_MORPH_ERODE 0
+#define CV_HAL_MORPH_DILATE 1
+//! @}
+
+//! @name Threshold types
+//! @sa cv::ThresholdTypes
+//! @{
+#define CV_HAL_THRESH_BINARY      0
+#define CV_HAL_THRESH_BINARY_INV  1
+#define CV_HAL_THRESH_TRUNC       2
+#define CV_HAL_THRESH_TOZERO      3
+#define CV_HAL_THRESH_TOZERO_INV  4
+#define CV_HAL_THRESH_MASK        7
+#define CV_HAL_THRESH_OTSU        8
+#define CV_HAL_THRESH_TRIANGLE    16
+//! @}
+
+//! @name Adaptive threshold algorithm
+//! @sa cv::AdaptiveThresholdTypes
+//! @{
+#define CV_HAL_ADAPTIVE_THRESH_MEAN_C     0
+#define CV_HAL_ADAPTIVE_THRESH_GAUSSIAN_C 1
+//! @}
+
+//! @}
+
+#endif
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /*M///////////////////////////////////////////////////////////////////////////////////////
+//
+//  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+//
+//  By downloading, copying, installing or using the software you agree to this license.
+//  If you do not agree to this license, do not download, install,
+//  copy or use the software.
+//
+//
+//                           License Agreement
+//                For Open Source Computer Vision Library
+//
+// Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+// Third party copyrights are property of their respective owners.
+//
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
+//
+//   * Redistribution's of source code must retain the above copyright notice,
+//     this list of conditions and the following disclaimer.
+//
+//   * Redistribution's in binary form must reproduce the above copyright notice,
+//     this list of conditions and the following disclaimer in the documentation
+//     and/or other materials provided with the distribution.
+//
+//   * The name of the copyright holders may not be used to endorse or promote products
+//     derived from this software without specific prior written permission.
+//
+// This software is provided by the copyright holders and contributors "as is" and
+// any express or implied warranties, including, but not limited to, the implied
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the OpenCV Foundation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise)

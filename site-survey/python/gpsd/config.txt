@@ -1,0 +1,3 @@
+/etc/systemd/system/gpsd.service
+
+/etc/default/gpsd

@@ -1,0 +1,14 @@
+[Unit]
+Description=GPSd daemon service file
+
+[Service]
+Type=forking
+User=root
+Group=dialout
+TimeoutStartSec=0
+ExecStart=/usr/local/sbin/gpsd /dev/ttyUSB0 -S 7070 -F /var/run/gpsd.sock
+
+
+[Install]
+# Grouping mechanism that let systemd start groups of processes up at the same time
+WantedBy=multi-user.target
