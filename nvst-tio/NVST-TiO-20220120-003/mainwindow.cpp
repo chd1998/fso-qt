@@ -95,7 +95,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //ui->btnSnap->setEnabled(false);
     //ui->actionServer->setEnabled(false);
     //ui->verticalLayout_2->setAlignment(Qt::AlignTop);
-    setWindowTitle("NVST-TiO 20220120-004 (Qt6+minGW64+OpenCV) - by Chen Dong @fso");
+    QString proFullPath=QCoreApplication::applicationFilePath();
+    QFileInfo tmpinfo(proFullPath);
+    QString proName=tmpinfo.fileName();
+    QStringList tmplist=proName.split(".");
+    setWindowTitle(tmplist[0]+" (Qt6+minGW64+OpenCV) - by Chen Dong @fso");
     about = new AboutWindow(this);
     //this->loadPropertyList(":/profile.json");
     this->setupStatusBar();
@@ -461,21 +465,6 @@ void MainWindow::on_btnLive_pressed() {
         if(frameRate<=0 || frameRate>200)
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
-        /*current_date_time =QDateTime::currentDateTimeUtc();
-        current_date_d =current_date_time.toString("yyyyMMdd");
-
-        save01=saveTo+current_date_d+"\\TIO\\";
-
-        savepreobj=save01+objname;
-
-        savepredf=save01+fpre;
-
-        saveDir=save01;*/
-        //qDebug()<<"live pressed:"<<saveDir;
-        //savepre =current_date_time.toString("hhmmss");
-        //connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ);
-
-        //liveTimer->start(framedelay+10);
     }
     else {
         live=false;
@@ -572,11 +561,20 @@ void MainWindow::stopACQ(){
     ui->textEdit_status->append(datatype+" Stop Singal Received...");
     logtmp=datatype+" Stop Singal Received...";
     outfile<<logtmp.toStdString()<<"\n";
-    ui->textEdit_status->append(datatype+" Acquisition Stopped...");
-    logtmp=datatype+" Acquisition Stopped...";
+    if(datatype=="FLAT")
+        ui->textEdit_status->append(datatype+" Count "+QString::number(flatcnt)+" Acquisition Stopped...");
+    else
+        ui->textEdit_status->append(datatype+" Acquisition Stopped...");
+    if(datatype=="FLAT")
+        logtmp=datatype+" Count "+QString::number(flatcnt)+" Acquisition Stopped...";
+    else
+        logtmp=datatype+" Acquisition Stopped...";
     outfile<<logtmp.toStdString()<<"\n";
     QString numf = QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'));
-    logtmp=datatype+" acquired "+numf+" frame(s)...";
+    if(datatype=="FLAT")
+        logtmp=datatype+" Count "+QString::number(flatcnt)+" accquired "+numf+" frames...";
+    else
+        logtmp=datatype+" acquired "+numf+" frames...";
     ui->textEdit_status->append(logtmp);
     outfile<<logtmp.toStdString()<<"\n";
     if(fulldisk)
