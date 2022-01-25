@@ -166,7 +166,7 @@
       <item>
        <widget class="QLineEdit" name="lineEdit_exposuretime">
         <property name="text">
-         <string>1.000</string>
+         <string>0.050</string>
         </property>
        </widget>
       </item>

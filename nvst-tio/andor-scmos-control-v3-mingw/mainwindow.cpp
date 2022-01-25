@@ -374,7 +374,7 @@ void MainWindow::on_btnLive_toggled(bool checked) {
         ui->textEdit_status->append("Live Video Started...");
         ui->btnLive->setText("Stop Live");
         ui->btnSnap->setEnabled(true);
-        liveTimer->start(30);
+        liveTimer->start(expTime*1000);
     } else {
         liveTimer->stop();
         delete liveTimer;
