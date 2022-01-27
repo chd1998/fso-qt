@@ -1,5 +1,6 @@
 #include "aboutwindow.h"
 #include "ui_aboutwindow.h"
+#include <QFileInfo>
 #include <QSettings>
 #include <windows.h>
 
@@ -19,7 +20,11 @@ AboutWindow::AboutWindow(QWidget *parent) : QDialog(parent), ui(new Ui::AboutWin
     ui->appName->setAlignment(Qt::AlignHCenter);
     ui->appName->setText("<h1>Andor Zyla for NVST-TiO</h1>");
     ui->version->setAlignment(Qt::AlignHCenter);
-    ui->version->setText("<h2>Version 20220120-001</h2>");
+    QString proFullPath=QCoreApplication::applicationFilePath();
+    QFileInfo tmpinfo(proFullPath);
+    QString proName=tmpinfo.fileName();
+    QStringList tmplist=proName.split(".");
+    ui->version->setText("<h2>"+tmplist[0]+"</h2>");
     //ui->description->setAlignment(Qt::AlignHCenter);
     //ui->description->setWordWrap(true);
     //ui->description->setOpenExternalLinks(true);

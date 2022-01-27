@@ -104,7 +104,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //ui->btnSnap->setEnabled(false);
     //ui->actionServer->setEnabled(false);
     //ui->verticalLayout_2->setAlignment(Qt::AlignTop);
-    setWindowTitle("NVST-HighSpeed-TiO-20220120-001 (Qt6+minGW64+OpenCV) --- by Chen Dong @fso");
+    QString proFullPath=QCoreApplication::applicationFilePath();
+    QFileInfo tmpinfo(proFullPath);
+    QString proName=tmpinfo.fileName();
+    QStringList tmplist=proName.split(".");
+    setWindowTitle(tmplist[0]+" (Qt6+minGW64+OpenCV) - by Chen Dong @fso");
     about = new AboutWindow(this);
     //this->loadPropertyList(":/profile.json");
     this->setupStatusBar();
@@ -562,11 +566,20 @@ void MainWindow::stopACQ(){
     ui->textEdit_status->append(datatype+" Stop Singal Received...");
     logtmp=datatype+" Stop Singal Received...";
     outfile<<logtmp.toStdString()<<"\n";
-    ui->textEdit_status->append(datatype+" Acquisition Stopped...");
-    logtmp=datatype+" Acquisition Stopped...";
+    if(datatype=="FLAT")
+        ui->textEdit_status->append(datatype+" Count "+QString::number(flatcnt)+" Acquisition Stopped...");
+    else
+        ui->textEdit_status->append(datatype+" Acquisition Stopped...");
+    if(datatype=="FLAT")
+        logtmp=datatype+" Count "+QString::number(flatcnt)+" Acquisition Stopped...";
+    else
+        logtmp=datatype+" Acquisition Stopped...";
     outfile<<logtmp.toStdString()<<"\n";
     QString numf = QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'));
-    logtmp=datatype+" accquired "+numf+" frames...";
+    if(datatype=="FLAT")
+        logtmp=datatype+" Count "+QString::number(flatcnt)+" accquired "+numf+" frames...";
+    else
+        logtmp=datatype+" acquired "+numf+" frames...";
     ui->textEdit_status->append(logtmp);
     outfile<<logtmp.toStdString()<<"\n";
     if(fulldisk)
