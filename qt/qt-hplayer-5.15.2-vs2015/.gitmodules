@@ -1,3 +1,0 @@
-[submodule "src/hv"]
-	path = src/hv
-	url = https://github.com/ithewei/libhv.git
