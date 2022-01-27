@@ -205,7 +205,7 @@ void aCCD::getData()
             QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
             saveDir=savepref+fcnt;
             QDir *fdir = new QDir(saveDir);
-            QDir tmpdir;
+            QDir tmpdir(saveDir);
             QStringList filter;
             filter<<"*.fits";
             fdir->setNameFilters(filter);
@@ -214,12 +214,12 @@ void aCCD::getData()
             {
                 tmpdir.removeRecursively();
             }
-            else
-            {
-                emit stop_Acq();
-            }
+            if(fileInfoList.count() == datanum)
+                 emit stop_Acq();
+            delete fdir;
 
         }
+
     }
     qDebug()<<"Saving Pre: "<<savepred<<" "<<savepref<<" "<<savepre;
     qDebug()<<"Saving Dir: "<<saveDir;
@@ -260,7 +260,8 @@ void aCCD::getData()
          //AT_InitialiseUtilityLibrary();
          AT_ConvertBuffer(buffer, reinterpret_cast<unsigned char *>(unpackedBuffer), imgW, imgH, imgStride, pixelEncoding, L"Mono16");
          //AT_FinaliseUtilityLibrary();
-         emit buf_Ready(unpackedBufferback,len);
+         if(display)
+            emit buf_Ready(unpackedBufferback,len);
          //size_t nsize=sizeof(unpackedBufferback)/sizeof(unpackedBufferback[0]);
          //imgMax=*std::max_element(unpackedBufferback,unpackedBufferback+(sizeof(unpackedBufferback)/sizeof(unpackedBufferback[0])));
          //imgMax=*std::max_element(unpackedBufferback,unpackedBufferback+sizeof(unpackedBufferback)/sizeof(unpackedBufferback[0]));

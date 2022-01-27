@@ -207,7 +207,7 @@ void aCCD::getData()
             QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
             saveDir=savepref+fcnt;
             QDir *fdir = new QDir(saveDir);
-            QDir tmpdir;
+            QDir tmpdir(saveDir);
             QStringList filter;
             filter<<"*.fits";
             fdir->setNameFilters(filter);
@@ -216,12 +216,14 @@ void aCCD::getData()
             {               
                 tmpdir.removeRecursively();
             }
-            else
-            {
+
+            if(fileInfoList.count() == datanum  && display)
                 emit stop_Acq();
-            }
+
             if(!sdir.exists(saveDir))
               sdir.mkpath(saveDir);
+
+            delete fdir;
         }
 
     }

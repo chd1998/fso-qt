@@ -336,9 +336,9 @@ void MainWindow::showTime()
     ui->label_freedisk->setText(diskfree);
     if(savefits)
     {
-        labelStat->setText(" "+QString::number(fserialNo)+" Frame(s)");
+        labelStat->setText(" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
     }else{
-        labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
+        labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
     }
 }
 
