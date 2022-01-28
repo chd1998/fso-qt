@@ -334,12 +334,12 @@ void MainWindow::showTime()
         diskfree=full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     }
     ui->label_freedisk->setText(diskfree);
-    if(savefits)
+    /*if(savefits)
     {
         labelStat->setText(" "+QString::number(fserialNo)+" Frame(s)");
     }else{
         labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
-    }
+    }*/
 }
 
 void MainWindow::updateCursorCoord(double x, double y) {
@@ -760,7 +760,8 @@ void MainWindow::on_btnSnap_pressed() {
 
 
 void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
-    if(live && display && NULL != buf)
+    //if(live && display && NULL != buf)
+    if(live  && NULL != buf)
     {
         //currentImage.release();
         currentImage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, buf);
@@ -813,7 +814,10 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
             ui->textEdit_status->textCursor().deletePreviousChar();
             ui->textEdit_status->setTextCursor(storeCursorPos);
             ui->textEdit_status->append(ccdM);
+            labelStat->setText(" "+QString("%1").arg(fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s)");
         }
+        else
+            labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
         display=false;
     }
 }
