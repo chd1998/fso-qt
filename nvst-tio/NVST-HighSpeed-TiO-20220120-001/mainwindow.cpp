@@ -53,7 +53,7 @@ QString fpre;
 int displayRate,numBuffer;
 QString CamF,CamM,CamN;
 long t0=0;
-int serialNo=0,fserialNo=0;
+int serialNo=0,fserialNo=0,sum_fserialNo=0;
 bool firsttime=true,localsave=true,localfirst=true;;
 QString objname="Sun";
 QString obscor1="N00",obscor2="E00";
@@ -331,6 +331,12 @@ void MainWindow::showTime()
     }
     //QString diskfree=diskname+" ---> "+QString::number(freeDiskSpace)+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     ui->label_freedisk->setText(diskfree);
+    if(savefits)
+    {
+        labelStat->setText(" "+QString("%1").arg(sum_fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s)");
+    }else{
+        labelStat->setText(" Stopped - "+QString("%1").arg(fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
+    }
 }
 
 void MainWindow::updateCursorCoord(double x, double y) {
@@ -346,12 +352,12 @@ void MainWindow::updateCursorCoord(double x, double y) {
         }
     }
     labelCoordMV->setText(QString::number(imgMax));
-    if(savefits)
+    /*if(savefits)
     {
         labelStat->setText(" "+QString::number(fserialNo)+" Frame(s)");
     }else{
         labelStat->setText(" Stopped - "+QString("%1").arg(fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
-    }
+    }*/
 }
 
 void MainWindow::setupStatusBar() {
@@ -749,6 +755,7 @@ void MainWindow::on_btnSnap_pressed() {
         t.start();
         while(t.elapsed()<5000)
             QCoreApplication::processEvents();*/
+        sum_fserialNo=sum_fserialNo+fserialNo;
         fserialNo=0;
         serialNo=0;
         if(fpre=="FLAT")

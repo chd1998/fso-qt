@@ -48,7 +48,7 @@ extern QString fpre;
 extern int numBuffer;
 extern QString CamF,CamM,CamN;
 extern long t0;
-extern int serialNo,fserialNo;
+extern int serialNo,fserialNo,sum_fserialNo;
 extern uint datanum;
 extern bool firsttime,localsave,localfirst;
 extern QString objname;
