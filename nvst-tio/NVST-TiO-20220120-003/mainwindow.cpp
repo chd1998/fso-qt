@@ -764,7 +764,7 @@ void MainWindow::on_btnSnap_pressed() {
 
 
 void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
-    if(live && display && NULL != buf)
+    if(live && NULL != buf)
     {
         //currentImage.release();
         currentImage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, buf);

@@ -207,11 +207,7 @@ void aCCD::getData()
             QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
             saveDir=savepref+fcnt;
             QDir *fdir = new QDir(saveDir);
-<<<<<<< HEAD
             QDir tmpdir(saveDir);
-=======
-            QDir tmpdir;
->>>>>>> 199f7925c8920ab2900a0965bb04870a9844f24e
             QStringList filter;
             filter<<"*.fits";
             fdir->setNameFilters(filter);
@@ -219,13 +215,6 @@ void aCCD::getData()
             if(fserialNo == 0 && tmpdir.exists(saveDir) && fileInfoList.count() != datanum)
             {               
                 tmpdir.removeRecursively();
-<<<<<<< HEAD
-=======
-            }
-            else
-            {
-                emit stop_Acq();
->>>>>>> 199f7925c8920ab2900a0965bb04870a9844f24e
             }
 
             if(fileInfoList.count() == datanum  && display)
