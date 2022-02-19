@@ -125,6 +125,12 @@ private slots:
 
     //void aboutToQuit();
 
+    void on_checkBox_Data_clicked();
+
+    void on_checkBox_Dark_clicked();
+
+    void on_checkBox_Flat_clicked();
+
 private:
     Ui::MainWindow *ui;
     //QStandardItemModel *propertyBrowserModel;

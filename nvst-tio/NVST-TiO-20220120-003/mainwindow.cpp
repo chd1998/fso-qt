@@ -217,6 +217,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         outfile.close();
     }
     setFixedSize(this->width(),this->height());
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
     //outfile<<obslogdir.toStdString();
 }
 
@@ -631,8 +634,6 @@ void MainWindow::on_btnSnap_pressed() {
             datanum=ui->lineEdit_datanum->text().toUInt();
             if(datanum<=0)
                 continousACQ=true;
-            //if(datanum<0)
-                //datanum=200;
         }
         //QDir tmpdir;
         savepred=saveTo+current_date_d+"\\TIO\\dark\\"+current_date_t1+"\\"+current_date_t1;
@@ -936,3 +937,38 @@ void MainWindow::on_actionDetect_Cameras_triggered() {
     //AT_Close(handle);
     AT_FinaliseLibrary();
 }
+
+
+void MainWindow::on_checkBox_Data_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(true);
+    ui->lineEdit_cor1->setEnabled(true);
+    ui->lineEdit_cor2->setEnabled(true);
+
+    //ui->lineEdit_objname->setEnabled(false);
+    //ui->lineEdit_cor1->setEnabled(false);
+    //ui->lineEdit_cor2->setEnabled(false);
+}
+
+
+
+
+
+void MainWindow::on_checkBox_Dark_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+
+}
+
+
+void MainWindow::on_checkBox_Flat_clicked()
+{
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+}
+
