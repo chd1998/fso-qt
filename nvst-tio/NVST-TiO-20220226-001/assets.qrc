@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>assets/icon.ico</file>
-        <file>profile.json</file>
-        <file>assets/fso-01.png</file>
-    </qresource>
-</RCC>
