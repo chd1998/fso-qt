@@ -951,3 +951,32 @@ void MainWindow::on_actionDetect_Cameras_triggered() {
     //AT_Close(handle);
     AT_FinaliseLibrary();
 }
+
+void MainWindow::on_checkBox_Data_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(true);
+    ui->lineEdit_cor1->setEnabled(true);
+    ui->lineEdit_cor2->setEnabled(true);
+
+    //ui->lineEdit_objname->setEnabled(false);
+    //ui->lineEdit_cor1->setEnabled(false);
+    //ui->lineEdit_cor2->setEnabled(false);
+}
+
+void MainWindow::on_checkBox_Dark_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+
+}
+
+void MainWindow::on_checkBox_Flat_clicked()
+{
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+}
+

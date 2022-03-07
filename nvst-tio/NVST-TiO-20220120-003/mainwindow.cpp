@@ -951,10 +951,6 @@ void MainWindow::on_checkBox_Data_clicked()
     //ui->lineEdit_cor2->setEnabled(false);
 }
 
-
-
-
-
 void MainWindow::on_checkBox_Dark_clicked()
 {
 
@@ -963,7 +959,6 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_cor2->setEnabled(false);
 
 }
-
 
 void MainWindow::on_checkBox_Flat_clicked()
 {
