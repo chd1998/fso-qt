@@ -14,8 +14,8 @@
 #include <iostream>
 #include <QMutex>
 #include <QDir>
-#include "atcore.h"
-#include "atutility.h"
+#include "atlib/atcore.h"
+#include "atlib/atutility.h"
 #include "propertybrowserdelegate.h"
 #include "utils.h"
 #include "server.h"
@@ -145,6 +145,8 @@ private:
     QLabel *labelCoordV;
     QLabel *labelCoordMV;
     QLabel *labelStat;
+    QLabel *labelinfo;
+
     cv::Mat currentImage;
     QTimer *liveTimer = nullptr;
     AT_64 imageSizeBytes;

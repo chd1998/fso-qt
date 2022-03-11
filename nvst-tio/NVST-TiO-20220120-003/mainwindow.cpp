@@ -28,7 +28,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
-#include "atlib/atutility.h"
+//#include "atlib/atutility.h"
 #include "time_sys/time_sys.h"
 #include "accd/accd.h"
 
@@ -148,6 +148,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             ui->lineEdit_cor2->setText(obscor2);
             ui->btnLive->setEnabled(true);
             ui->btnSnap->setEnabled(false);
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
             ui->actionServer->setEnabled(false);
 
         }else
@@ -155,6 +158,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             ui->btnLive->setEnabled(false);
             ui->btnSnap->setEnabled(false);
             ui->actionServer->setEnabled(false);
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
             logtmp="Open Camera Failed...";
             ui->textEdit_status->append(logtmp);
             mutex.lock();
@@ -166,6 +172,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         ui->btnLive->setEnabled(false);
         ui->btnSnap->setEnabled(false);
         ui->actionServer->setEnabled(false);
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
         mutex.lock();
         QDateTime current_date_time =QDateTime::currentDateTimeUtc();
         QString todaynow =current_date_time.toString("yyyyMMdd hh:mm:ss");
@@ -337,12 +346,7 @@ void MainWindow::showTime()
         diskfree=full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     }
     ui->label_freedisk->setText(diskfree);
-    if(savefits)
-    {
-        labelStat->setText(" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
-    }else{
-        labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
-    }
+
 }
 
 void MainWindow::updateCursorCoord(double x, double y) {
@@ -398,13 +402,13 @@ void MainWindow::setupStatusBar() {
     ui->statusBar->addWidget(label);
     ui->statusBar->addWidget(labelCoordMV);
 
-    label = new QLabel(this);
-    label->setText(" Saving ");
-    label->setAlignment(Qt::AlignCenter);
-    label->setMinimumWidth(20);
+    labelinfo = new QLabel(this);
+    labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");
+    labelinfo->setAlignment(Qt::AlignCenter);
+    labelinfo->setMinimumWidth(20);
     labelStat = new QLabel(this);
     labelStat->setMinimumWidth(60);
-    ui->statusBar->addWidget(label);
+    ui->statusBar->addWidget(labelinfo);
     ui->statusBar->addWidget(labelStat);
 }
 
@@ -468,6 +472,7 @@ void MainWindow::on_btnLive_pressed() {
         if(frameRate<=0 || frameRate>200)
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
+        labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");
     }
     else {
         live=false;
@@ -793,8 +798,9 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
         ui->graphicsView->update();
         item = new QGraphicsPixmapItem(QPixmap::fromImage(*qimage));
         scene->addItem(item);
-        scene->setSceneRect(QRectF(0, 0, imgH, imgW));
-        //scene->setSceneRect(QRectF(0, 0, lossyImage.cols, lossyImage.rows));
+        //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
+        scene->setSceneRect(QRectF(0, 0, lossyImage.cols, lossyImage.rows));
+        //ui->graphicsView->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
         ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
         ui->graphicsView->update();
         currentImage.release();
@@ -818,6 +824,10 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
             ui->textEdit_status->textCursor().deletePreviousChar();
             ui->textEdit_status->setTextCursor(storeCursorPos);
             ui->textEdit_status->append(ccdM);
+            labelStat->setText(" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
+
+        }else{
+            labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
         }
         display=false;
     }
@@ -951,10 +961,6 @@ void MainWindow::on_checkBox_Data_clicked()
     //ui->lineEdit_cor2->setEnabled(false);
 }
 
-
-
-
-
 void MainWindow::on_checkBox_Dark_clicked()
 {
 
@@ -963,7 +969,6 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_cor2->setEnabled(false);
 
 }
-
 
 void MainWindow::on_checkBox_Flat_clicked()
 {

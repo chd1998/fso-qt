@@ -149,12 +149,18 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             ui->btnLive->setEnabled(true);
             ui->btnSnap->setEnabled(false);
             ui->actionServer->setEnabled(false);
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
 
         }else
         {
             ui->btnLive->setEnabled(false);
             ui->btnSnap->setEnabled(false);
             ui->actionServer->setEnabled(false);
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
             logtmp="Open Camera Failed...";
             ui->textEdit_status->append(logtmp);
             mutex.lock();
@@ -166,6 +172,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         ui->btnLive->setEnabled(false);
         ui->btnSnap->setEnabled(false);
         ui->actionServer->setEnabled(false);
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
         logtmp="No Camera found...";
         ui->textEdit_status->append(logtmp);
         mutex.lock();
@@ -322,12 +331,12 @@ void MainWindow::showTime()
     if(freedisk>1000)
     {
         empty="<font style='color:green;'>"+QString::number(freeDiskSpace)+"</font>";
-        diskfree=diskname+" ---> "+empty+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
+        diskfree=empty+"/"+QString::number(totalDiskSpace)+" GB(Free/Total)";
     }
     else
     {
         full="<font style='color:red;'>"+QString::number(freeDiskSpace)+"</font>";
-        diskfree=diskname+" ---> "+full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
+        diskfree=full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     }
     //QString diskfree=diskname+" ---> "+QString::number(freeDiskSpace)+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     ui->label_freedisk->setText(diskfree);
@@ -398,13 +407,13 @@ void MainWindow::setupStatusBar() {
     ui->statusBar->addWidget(label);
     ui->statusBar->addWidget(labelCoordMV);
 
-    label = new QLabel(this);
-    label->setText(" Saving ");
-    label->setAlignment(Qt::AlignCenter);
-    label->setMinimumWidth(20);
+    labelinfo = new QLabel(this);
+    labelinfo->setText(" ");
+    labelinfo->setAlignment(Qt::AlignCenter);
+    labelinfo->setMinimumWidth(20);
     labelStat = new QLabel(this);
     labelStat->setMinimumWidth(60);
-    ui->statusBar->addWidget(label);
+    ui->statusBar->addWidget(labelinfo);
     ui->statusBar->addWidget(labelStat);
 }
 
@@ -468,6 +477,7 @@ void MainWindow::on_btnLive_pressed() {
         if(frameRate<=0 || frameRate>200)
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
+        labelinfo->setText(QString::number(imgW)+"x"+QString::number(imgH)+" 16bits");
         /*current_date_time =QDateTime::currentDateTimeUtc();
         current_date_d =current_date_time.toString("yyyyMMdd");
 
@@ -794,8 +804,8 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
         ui->graphicsView->update();
         item = new QGraphicsPixmapItem(QPixmap::fromImage(*qimage));
         scene->addItem(item);
-        scene->setSceneRect(QRectF(0, 0, imgH, imgW));
-        //scene->setSceneRect(QRectF(0, 0, lossyImage.cols, lossyImage.rows));
+        //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
+        scene->setSceneRect(QRectF(0, 0, lossyImage.cols, lossyImage.rows));
         ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
         ui->graphicsView->update();
         currentImage.release();
@@ -951,3 +961,32 @@ void MainWindow::on_actionDetect_Cameras_triggered() {
     //AT_Close(handle);
     AT_FinaliseLibrary();
 }
+
+void MainWindow::on_checkBox_Data_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(true);
+    ui->lineEdit_cor1->setEnabled(true);
+    ui->lineEdit_cor2->setEnabled(true);
+
+    //ui->lineEdit_objname->setEnabled(false);
+    //ui->lineEdit_cor1->setEnabled(false);
+    //ui->lineEdit_cor2->setEnabled(false);
+}
+
+void MainWindow::on_checkBox_Dark_clicked()
+{
+
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+
+}
+
+void MainWindow::on_checkBox_Flat_clicked()
+{
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+}
+

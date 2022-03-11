@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>937</width>
+    <width>1151</width>
     <height>763</height>
    </rect>
   </property>
@@ -31,7 +31,7 @@
      <rect>
       <x>340</x>
       <y>10</y>
-      <width>581</width>
+      <width>801</width>
       <height>681</height>
      </rect>
     </property>
@@ -250,11 +250,12 @@
     </property>
     <property name="font">
      <font>
+      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Log (Andor Neo for NVST - TiO)</string>
+     <string>Log (Andor Neo for NVST - TiO 7058A)</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEdit_status">
@@ -519,8 +520,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>937</width>
-     <height>22</height>
+     <width>1151</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

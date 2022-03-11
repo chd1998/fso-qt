@@ -125,6 +125,12 @@ private slots:
 
     //void aboutToQuit();
 
+    void on_checkBox_Flat_clicked();
+
+    void on_checkBox_Dark_clicked();
+
+    void on_checkBox_Data_clicked();
+
 private:
     Ui::MainWindow *ui;
     //QStandardItemModel *propertyBrowserModel;
@@ -139,6 +145,7 @@ private:
     QLabel *labelCoordV;
     QLabel *labelCoordMV;
     QLabel *labelStat;
+    QLabel *labelinfo;
     cv::Mat currentImage;
     QTimer *liveTimer = nullptr;
     AT_64 imageSizeBytes;
