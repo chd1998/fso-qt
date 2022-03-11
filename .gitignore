@@ -58,6 +58,7 @@ ui_*.h
 Makefile*
 *build-*
 *.stash
+.qtc_clangd*
 
 #vs files
 *.sln
