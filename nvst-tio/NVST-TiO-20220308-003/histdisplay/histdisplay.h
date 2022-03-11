@@ -12,7 +12,7 @@ class histdisplay : public QObject
 public:
     histdisplay();
 signals:
-    void hist_ready();
+    void hist_ready(int*,int,int);
     void finished();
 public slots:
     void buf2img(unsigned short*);

@@ -150,6 +150,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ);
             connect(task,&histdisplay::hist_ready,this,&MainWindow::drawHist);
             *histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
+
+            histthread->start();
             //connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::drawHist);
             //ui->textEdit_status->append("Connected to Camera "+QString::number(ui->spinBoxCameraIndex->value()));
             ccdID=0;
@@ -854,11 +856,12 @@ void MainWindow::on_btnSnap_pressed() {
 
 
 
-void MainWindow::drawHist()
+void MainWindow::drawHist(int *data,int max,int idx)
 {
 
     qDebug("here inside drawHist...");
-    imgready=false;
+    int yRange = 0;
+    /*imgready=false;
     int yRange = 0;
     int data[256]{0};
     int max=0,idx=0;
@@ -878,8 +881,8 @@ void MainWindow::drawHist()
                     idx=index;
                 }
             }
-        }
-
+        }*/
+    imgready=false;
     qDebug()<<max<<" "<<idx<<" ";
     //设置每个“柱”的颜色，值，宽度等
     QBarSet *set = new QBarSet("GrayScale");

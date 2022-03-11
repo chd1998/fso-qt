@@ -154,7 +154,7 @@ private slots:
 
     //void drawHist(unsigned short *,int);
     //void drawHist();
-    void drawHist();
+    void drawHist(int*,int,int);
     //void drawHist(cv::Mat);
 
 signals:
