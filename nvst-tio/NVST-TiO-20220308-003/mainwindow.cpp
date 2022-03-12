@@ -373,7 +373,7 @@ void MainWindow::showTime()
     long t1 = current_date_time.toSecsSinceEpoch();
     float dt = (float)(t1-t0)/3600.0;
     QString angle_sign=u8"°C";
-    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" "+QString::number(dt,'f',4)+"hrs "+QString::number(temperature)+angle_sign;
+    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || System Up: "+QString::number(dt,'f',4)+"hrs || Sensor Cooling: "+QString::number(temperature)+angle_sign;
     ui->label_time->setText(current_date);
     diskname=ui->lineEdit_saveto->text();
     quint64 freeDiskSpace = getDiskSpace(diskname, false);
