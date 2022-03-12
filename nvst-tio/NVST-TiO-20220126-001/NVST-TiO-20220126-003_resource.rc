@@ -1,6 +1,6 @@
 #include <windows.h>
 
-IDI_ICON1	ICON	"D:\\qt\\NVST-TiO\\NVST-TiO-20220126-001\\assets\\icon.ico"
+IDI_ICON1	ICON	"D:\\mywork\\qt\\andor-TiO\\NVST-TiO-20220126-001\\assets\\icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,0,0,0
