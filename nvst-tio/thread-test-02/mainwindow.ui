@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>623</height>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
       <x>30</x>
       <y>450</y>
       <width>361</width>
-      <height>80</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -85,6 +85,19 @@
       <string>Resume A</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="btn_stopA">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>71</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop A</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -92,7 +105,7 @@
       <x>410</x>
       <y>450</y>
       <width>361</width>
-      <height>80</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -137,25 +150,25 @@
       <string>Resume B</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QPushButton" name="btn_stop">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>540</y>
-      <width>171</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Stop</string>
-    </property>
+    <widget class="QPushButton" name="btn_stopB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>75</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop B</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="btn_exit">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>540</y>
+      <x>320</x>
+      <y>570</y>
       <width>171</width>
       <height>24</height>
      </rect>

@@ -22,6 +22,7 @@ public:
     ~MainWindow();
 
     void closeEvent(QCloseEvent *event);
+    void closeP();
 
     QThread* thread1;
     QThread* thread2;
@@ -42,7 +43,8 @@ private slots:
     void on_btn_start_B_clicked();
     void on_btn_pause_B_clicked();
     void on_btn_resume_B_clicked();
-    void on_btn_stop_pressed();
     void on_btn_exit_clicked();
+    void on_btn_stopA_pressed();
+    void on_btn_stopB_pressed();
 };
 #endif // MAINWINDOW_H
