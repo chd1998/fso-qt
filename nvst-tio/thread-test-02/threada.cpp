@@ -9,6 +9,7 @@ threadA::threadA()
 
 void threadA::working()
 {
+    qDebug()<<"inside A-01";
     while(!QThread::currentThread()->isInterruptionRequested())
     //while(!stoppedA)
     {
@@ -16,11 +17,12 @@ void threadA::working()
         //{
         //    break;
         //}
+        qDebug()<<"inside A-02";
         lockA.lock();
         emit fromA(src,countA);
         countA++;
-
         lockA.unlock();
+        qDebug()<<"inside A-03";
         QElapsedTimer t;
         t.start();
         while(t.elapsed()<100)

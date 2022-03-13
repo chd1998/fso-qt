@@ -9,6 +9,7 @@ threadB::threadB()
 
 void threadB::working()
 {
+    qDebug()<<"inside B";
     while(!QThread::currentThread()->isInterruptionRequested())
     //while(!stoppedB)
     {
