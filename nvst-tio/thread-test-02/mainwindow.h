@@ -7,7 +7,7 @@
 #include <QThread>
 #include <QMutex>
 extern  QMutex lockA,lockB;
-extern  bool pausedA,pausedB,stoppedA,stoppedB;
+extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

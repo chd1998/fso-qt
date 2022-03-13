@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false;
+bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false;
 QMutex lockA,lockB;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -66,6 +66,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     ui->textEdit_StatusB->append("Waiting for ThreadB to stop...");
     QElapsedTimer t;
     t.start();
+    closeP();
     while(t.elapsed()<2000)
         QCoreApplication::processEvents();
     QCoreApplication::exit(0);
@@ -91,6 +92,7 @@ void MainWindow::on_btn_start_A_clicked()
         ui->btn_pause_A->setEnabled(true);
         ui->btn_resume_A->setEnabled(false);
         ui->btn_stopA->setEnabled(true);
+        startedA=true;
     }else{
         ui->textEdit_StatusA->append("ThreadA start failed...");
     }
@@ -134,6 +136,7 @@ void MainWindow::on_btn_stopA_pressed()
             qDebug()<<"Waiting...";
         }
         thread1->deleteLater();
+        startedA=false;
     }
 
     if(thread1->isFinished()){
@@ -167,6 +170,7 @@ void MainWindow::on_btn_start_B_clicked()
         ui->btn_pause_B->setEnabled(true);
         ui->btn_resume_B->setEnabled(false);
         ui->btn_stopB->setEnabled(true);
+        startedB=true;
     }else{
         ui->textEdit_StatusB->append("ThreadB start failed...");
     }
@@ -215,6 +219,7 @@ void MainWindow::on_btn_stopB_pressed()
             qDebug()<<"Waiting...";
         }
         thread2->deleteLater();
+        startedB=false;
     }
     if(thread2->isFinished()){
         stoppedB=true;
@@ -232,6 +237,7 @@ void MainWindow::on_btn_exit_clicked()
 {
     ui->textEdit_StatusA->append("Waiting for ThreadA to stop...");
     ui->textEdit_StatusB->append("Waiting for ThreadB to stop...");
+    closeP();
     QElapsedTimer t;
     t.start();
     while(t.elapsed()<2000)
@@ -252,8 +258,8 @@ void MainWindow::closeP()
         lockA.unlock();
     if(pausedB)
         lockB.unlock();
-    if(thread1->isRunning()){
-        //thread->disconnect();
+    if(startedA){
+        thread1->disconnect();
         thread1->requestInterruption();
         thread1->quit();
         thread1->wait();
@@ -265,8 +271,8 @@ void MainWindow::closeP()
             QCoreApplication::processEvents();
         }
     }
-    if(thread2->isRunning()){
-        //thread->disconnect();
+    if(startedB){
+        thread2->disconnect();
         thread2->requestInterruption();
         thread2->quit();
         thread2->wait();
