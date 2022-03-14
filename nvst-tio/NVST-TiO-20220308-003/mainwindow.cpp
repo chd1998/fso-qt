@@ -909,6 +909,7 @@ void MainWindow::drawHist(int *data,int max,int idx)
     //series->replace(set);
     series->append(set);
     series->setBarWidth(1);
+    series->setUseOpenGL(true);
 
     //设置横坐标
     axisX = new QCategoryAxis();
