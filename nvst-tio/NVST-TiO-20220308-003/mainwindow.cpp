@@ -64,7 +64,7 @@ int flatcnt=0;
 QFile obslog;
 QString obslogfile,obslogdir,obslogdate,logtmp,obsname;
 std::ofstream outfile;
-QMutex mutex;
+QMutex mutex,histlock;
 quint16 imgMax=0,freedisk;
 double sx=200,sy=200,ex=800,ey=800;
 bool drawing=false;
@@ -74,6 +74,12 @@ bool continousACQ=false,fulldisk=false;
 QDir sdir;
 QString current_date_t1,current_date_t2,current_date_t3,current_date_d;
 QImage *histimg;
+QBarSet *set = nullptr;
+QBarSeries *series = nullptr;
+QCategoryAxis *axisX = nullptr;
+QValueAxis *axisY = nullptr;
+QChart *chart= nullptr;
+bool histfirst=true;
 //QChart *chart;
 
 //QTextStream obsout;
@@ -858,9 +864,17 @@ void MainWindow::on_btnSnap_pressed() {
 
 void MainWindow::drawHist(int *data,int max,int idx)
 {
-
+    histlock.lock();
+    if(!histfirst)
+    {
+        delete set;
+        delete series;
+        delete axisX;
+        delete axisY;
+    }
     qDebug("here inside drawHist...");
     int yRange = 0;
+    imgready=false;
     /*imgready=false;
     int yRange = 0;
     int data[256]{0};
@@ -885,19 +899,19 @@ void MainWindow::drawHist(int *data,int max,int idx)
     imgready=false;
     qDebug()<<max<<" "<<idx<<" ";
     //设置每个“柱”的颜色，值，宽度等
-    QBarSet *set = new QBarSet("GrayScale");
+    set = new QBarSet("GrayScale");
     for (int i=0;i<256;i++) {
        set->append(data[i]);
        if(yRange<data[i]) yRange = data[i];
        set->setColor(QColor::Rgb);
     }
-    QBarSeries *series = new QBarSeries();
+    series = new QBarSeries();
     //series->replace(set);
     series->append(set);
     series->setBarWidth(1);
 
     //设置横坐标
-    QCategoryAxis *axisX = new QCategoryAxis();
+    axisX = new QCategoryAxis();
     axisX->setMin(0);
     axisX->setMax(255);
     QString tmpstring;
@@ -929,12 +943,12 @@ void MainWindow::drawHist(int *data,int max,int idx)
 
 
     //设置纵坐标
-    QValueAxis *axisY = new QValueAxis;
+    axisY = new QValueAxis;
     axisY->setLabelFormat("%d");
     axisY->setRange(0,yRange);
 
     //建表
-    QChart *chart = new QChart();
+    chart = new QChart();
     chart->addSeries(series);
     //chart->createDefaultAxes();
     chart->addAxis(axisX,Qt::AlignBottom);
@@ -951,8 +965,9 @@ void MainWindow::drawHist(int *data,int max,int idx)
     ui->chart_graphicsView->setChart(chart);
     ui->chart_graphicsView->setRenderHint(QPainter::Antialiasing);
     ui->chart_graphicsView->setVisible(true);
-    //histlock.unlock();
+    histlock.unlock();
     imgready=true;
+
 
 }
 

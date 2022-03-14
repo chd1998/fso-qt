@@ -16,6 +16,7 @@ void histdisplay::deleteLater()
 
 void histdisplay::buf2img(unsigned short* imgbuf)
 {
+    histlock.lock();
     cv::Mat tmpimage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, imgbuf);
     cv::Mat lossyImage;
     if(tmpimage.data)
@@ -46,6 +47,7 @@ void histdisplay::buf2img(unsigned short* imgbuf)
         }
     if(imgready)
         emit hist_ready(data,max,idx);
+    histlock.unlock();
 }
 
 

@@ -254,10 +254,10 @@ void aCCD::getData()
             emit buf_Ready(unpackedBufferback,len);
             //if(imgready)
             emit histReady(unpackedBufferback);
+            histfirst=false;
          }
          //qDebug()<<"Saving : "<<QString::number(fserialNo);
          //saveStatus=0;
-
          if(savefits && i >= 1 && !fulldisk ){
            if(fpre=="T" && localsave)
             saveStatus=saveData(saveDir,unpackedBufferback);
