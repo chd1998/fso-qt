@@ -44,20 +44,23 @@ void threadB::calcHist()
     //int yRange = 0;
     //int data[256]{0};
     //int max=0,idx=0;
-    for(int i = 0; i <grayimage->height(); i++){
-            for(int j = 0; j < grayimage->width(); j++){
-                //int index=cv::saturate_cast<int>(grayimage.ptr<cv::Vec3b>(i)[j][0]);
-                //int index=grayimage.ptr<cv::Vec3b>(i)[j][0];
-                int index=grayimage->pixelIndex(i,j);
-                ++histdata[index];
-                if(histdata[index]>max)
-                {
-                    max=histdata[index];
-                    idx=index;
+    if(grayimage != nullptr && startedA)
+    {
+        for(int i = 0; i <grayimage->height(); i++){
+                for(int j = 0; j < grayimage->width(); j++){
+                    //int index=cv::saturate_cast<int>(grayimage.ptr<cv::Vec3b>(i)[j][0]);
+                    //int index=grayimage.ptr<cv::Vec3b>(i)[j][0];
+                    int index=grayimage->pixelIndex(i,j);
+                    ++histdata[index];
+                    if(histdata[index]>max)
+                    {
+                        max=histdata[index];
+                        idx=index;
+                    }
+                    //oldhistdata[index]=histdata[index];
                 }
-                //oldhistdata[index]=histdata[index];
             }
-        }
+    }
 }
 //void threadB::finished()
 //{

@@ -331,6 +331,7 @@ void MainWindow::updateHist()
         delete series;
         delete axisX;
         delete axisY;
+        chart->removeAllSeries();
         qDebug()<<chart;
         //delete chart;
     }
