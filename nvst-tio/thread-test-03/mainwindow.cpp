@@ -6,7 +6,7 @@ QMutex lockA,lockB,imglock,histlock;
 QImage *grayimage,*grayimage16;
 int imgX=1024,imgY=1024;
 int histdata[256]{0},oldhistdata[256]{0};
-int max=0,idx=0;
+int histmax=0,idx=0;
 QBarSet *set = nullptr;
 QBarSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
@@ -43,7 +43,7 @@ void MainWindow::updateStatus(QString src,int count)
     }
     if(src == "B")
     {
-        ui->textEdit_StatusB->append(src+" , "+QString::number(count)+": "+QString::number(max)+" - "+QString::number(idx));
+        ui->textEdit_StatusB->append(src+" , "+QString::number(count)+": "+QString::number(histmax)+" - "+QString::number(idx));
     }
 }
 
@@ -331,8 +331,8 @@ void MainWindow::updateHist()
         delete series;
         delete axisX;
         delete axisY;
-        chart->removeAllSeries();
-        qDebug()<<chart;
+        //chart->removeAllSeries();
+        //qDebug()<<chart;
         //delete chart;
     }
     int yRange = 0;
@@ -340,13 +340,17 @@ void MainWindow::updateHist()
     set = new QBarSet("GrayScale");
     for (int i=0;i<256;i++) {
        //if(histfirst)
-       set->append(histdata[i]);
+            set->append(histdata[i]);
        //else
        //{
-       //    if(histdata[i] != oldhistdata[i] )
-       //     set->insert(i,histdata[i]);
+         // if(oldhistdata[i] != histdata[i] )
+         // {
+         //   set->insert(i,histdata[i]);
+          //  oldhistdata[i]=histdata[i];
+         // }
+
        //}
-       //oldhistdata[i]=histdata[i];
+
 
        if(yRange<histdata[i]) yRange = histdata[i];
        set->setColor(QColor::Rgb);
@@ -383,6 +387,9 @@ void MainWindow::updateHist()
 
     //建表
     chart = new QChart();
+    chart->setContentsMargins(0,0,0,0);
+    chart->setMargins(QMargins(0,0,0,0));
+    chart->setAutoFillBackground(true);
     chart->addSeries(series);
     //chart->createDefaultAxes();
     chart->addAxis(axisX,Qt::AlignBottom);

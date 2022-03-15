@@ -18,7 +18,7 @@ void threadB::working()
             //break;
         emit fromB(src,countB);
 
-        calcHist();
+        //calcHist();
         if(countB != 0)
             histfirst = false;
         if(!histlocked)
@@ -42,19 +42,23 @@ void threadB::working()
 void threadB::calcHist()
 {
     //int yRange = 0;
-    //int data[256]{0};
+    //int tmpdata[256]{0};
     //int max=0,idx=0;
+    //histdata[256]{0};
+    for(int i=0;i<256;i++)
+        histdata[i]=0;
     if(grayimage != nullptr && startedA)
     {
+        histmax=0;
         for(int i = 0; i <grayimage->height(); i++){
                 for(int j = 0; j < grayimage->width(); j++){
                     //int index=cv::saturate_cast<int>(grayimage.ptr<cv::Vec3b>(i)[j][0]);
                     //int index=grayimage.ptr<cv::Vec3b>(i)[j][0];
                     int index=grayimage->pixelIndex(i,j);
                     ++histdata[index];
-                    if(histdata[index]>max)
+                    if(histdata[index]>histmax)
                     {
-                        max=histdata[index];
+                        histmax=histdata[index];
                         idx=index;
                     }
                     //oldhistdata[index]=histdata[index];

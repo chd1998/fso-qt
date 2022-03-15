@@ -15,7 +15,7 @@ extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histl
 extern  int imgX,imgY;
 extern  QImage *grayimage,*grayimage16;
 extern  int histdata[256],oldhistdata[256];
-extern  int max,idx;
+extern  int histmax,idx;
 extern QBarSet *set ;
 extern QBarSeries *series ;
 extern QCategoryAxis *axisX ;
