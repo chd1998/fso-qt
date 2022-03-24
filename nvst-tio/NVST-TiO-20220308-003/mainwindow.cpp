@@ -73,7 +73,7 @@ uint datanum=200;
 bool continousACQ=false,fulldisk=false;
 QDir sdir;
 QString current_date_t1,current_date_t2,current_date_t3,current_date_d;
-QImage *histimg;
+QImage *histimg=nullptr;
 QBarSet *set = nullptr;
 QBarSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
@@ -155,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             connect(andorCCD,&aCCD::buf_Ready,task,&histdisplay::buf2img);
             connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ);
             connect(task,&histdisplay::hist_ready,this,&MainWindow::drawHist);
-            *histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
+            //*histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
 
             histthread->start();
             //connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::drawHist);
@@ -267,6 +267,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         datatype="TiO";
         datanum=ui->lineEdit_datanum->text().toUInt();
     }
+    ui->lineEdit_flatnum->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
@@ -531,15 +534,16 @@ void MainWindow::on_btnLive_pressed() {
         ui->lineEdit_framerate->setText(QString::number(frameRate));
         ui->lineEdit_exposuretime->setEnabled(false);
         ui->lineEdit_framerate->setEnabled(false);
-        ui->lineEdit_objname->setEnabled(false);
+        /*ui->lineEdit_objname->setEnabled(false);
         ui->lineEdit_cor1->setEnabled(false);
         ui->lineEdit_cor2->setEnabled(false);
         ui->lineEdit_darknum->setEnabled(false);
         ui->lineEdit_flatnum->setEnabled(false);
         ui->lineEdit_datanum->setEnabled(false);
         ui->lineEdit_saveto->setEnabled(false);
-        ui->lineEdit_savelog->setEnabled(false);
+        ui->lineEdit_savelog->setEnabled(false);*/
         labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");
+        //*histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
     }
     else {
         live=false;
@@ -957,6 +961,8 @@ void MainWindow::drawHist(int *data,int max,int idx)
     chart->setTitle("Image Histogram");
     //chart->setAnimationOptions(QChart::SeriesAnimations);
     chart->legend()->setVisible(false);
+    chart->layout()->setContentsMargins(0,0,0,0);
+    chart->setBackgroundRoundness(0);
     //chart->setGeometry(0,0,581,171);
 
     //表的容器
@@ -981,7 +987,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
         QImage *qimage;
         //currentImage.release();
         currentImage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, buf);
-        imgMax=*std::max_element(buf,buf+buflen);
+        //imgMax=*std::max_element(buf,buf+buflen);
         //if(imgMax<=0)
             //return;
         //if(currentImage.data)
@@ -992,12 +998,12 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
 
         //}
 
-            /*double minVal;
-            double maxVal;
-            cv::Point minLoc;
-            cv::Point maxLoc;
-            minMaxLoc(currentImage,&minVal,&maxVal,&minLoc, &maxLoc);
-            imgMax=maxVal;*/
+        double minVal;
+        double maxVal;
+        cv::Point minLoc;
+        cv::Point maxLoc;
+        minMaxLoc(currentImage,&minVal,&maxVal,&minLoc, &maxLoc);
+        imgMax=maxVal;
         //}
 
         labelCoordMV->setText(QString::number(imgMax));
@@ -1215,15 +1221,13 @@ void MainWindow::on_checkBox_Data_clicked()
     ui->lineEdit_objname->setEnabled(true);
     ui->lineEdit_cor1->setEnabled(true);
     ui->lineEdit_cor2->setEnabled(true);
-
+    ui->lineEdit_datanum->setEnabled(true);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(false);
     //ui->lineEdit_objname->setEnabled(false);
     //ui->lineEdit_cor1->setEnabled(false);
     //ui->lineEdit_cor2->setEnabled(false);
 }
-
-
-
-
 
 void MainWindow::on_checkBox_Dark_clicked()
 {
@@ -1231,13 +1235,18 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
 
 }
-
 
 void MainWindow::on_checkBox_Flat_clicked()
 {
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(true);
 }

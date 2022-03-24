@@ -332,8 +332,8 @@ int aCCD::saveData(QString savePath,unsigned short* buff)
         fkword=tmpchar.data();
         fits_update_key(fptr, TSTRING, "OBSOBJ", fkword,"NOAA, Solar activity region", &status);
         QDateTime current_date_time =QDateTime::currentDateTimeUtc();
-        current_date_d =current_date_time.toString("yyyyMMdd");
-        current_date_t3 =current_date_time.toString("hhmmss");
+        current_date_d =current_date_time.toString("yyyy-MM-dd");
+        current_date_t3 =current_date_time.toString("hh:mm:ss");
         QString obsdate=current_date_d+"T"+current_date_t3;
         tmpchar=obsdate.toLatin1();
         fkword=tmpchar.data();
@@ -374,6 +374,10 @@ int aCCD::saveData(QString savePath,unsigned short* buff)
         int ybin=1;
         fits_update_key(fptr, TINT, "XBINING", &xbin,"Binning factor in width",&status);
         fits_update_key(fptr, TINT, "YBINING", &ybin,"Binning factor in height",&status);
+        int w=imgW;
+        int h=imgH;
+        fits_update_key(fptr, TINT, "IMGWIDTH", &w,"Original Image Width",&status);
+        fits_update_key(fptr, TINT, "IMGHEIGH", &h,"Original Image height",&status);
         nelements = imgW*imgH; /* number of pixels to write */
         /* Write the array of integers to the image */
         fits_write_img(fptr, TUSHORT, fpixel, nelements, buff, &status);

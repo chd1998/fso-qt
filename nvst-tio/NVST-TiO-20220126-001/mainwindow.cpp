@@ -216,6 +216,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         datatype="TiO";
         datanum=ui->lineEdit_datanum->text().toUInt();
     }
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
@@ -477,6 +480,8 @@ void MainWindow::on_btnLive_pressed() {
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
         labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");
+        ui->lineEdit_exposuretime->setEnabled(false);
+        ui->lineEdit_framerate->setEnabled(false);
     }
     else {
         live=false;
@@ -520,6 +525,8 @@ void MainWindow::on_btnLive_pressed() {
         }
         mutex.unlock();
         ui->btnSnap->setText("Start Acquisition");
+        ui->lineEdit_exposuretime->setEnabled(true);
+        ui->lineEdit_framerate->setEnabled(true);
     }
 
 }
@@ -961,15 +968,13 @@ void MainWindow::on_checkBox_Data_clicked()
     ui->lineEdit_objname->setEnabled(true);
     ui->lineEdit_cor1->setEnabled(true);
     ui->lineEdit_cor2->setEnabled(true);
-
+    ui->lineEdit_datanum->setEnabled(true);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(false);
     //ui->lineEdit_objname->setEnabled(false);
     //ui->lineEdit_cor1->setEnabled(false);
     //ui->lineEdit_cor2->setEnabled(false);
 }
-
-
-
-
 
 void MainWindow::on_checkBox_Dark_clicked()
 {
@@ -977,14 +982,18 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
 
 }
-
 
 void MainWindow::on_checkBox_Flat_clicked()
 {
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(true);
 }
-
