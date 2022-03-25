@@ -184,8 +184,8 @@ void aCCD::getData()
     //e:\20211008\TIO\FLAT00
     //e:\20211008\TIO\12882\071655\071655
     QDateTime current_date_time =QDateTime::currentDateTimeUtc();
-    current_date_d =current_date_time.toString("yyyyMMdd");
-    current_date_t2 =current_date_time.toString("hhmmss");
+    current_date_d =current_date_time.toString("yyyy-MM-dd");
+    current_date_t2 =current_date_time.toString("hh:mm:ss");
     if(savefits && !fulldisk)
     {
         if(fpre=="T")
