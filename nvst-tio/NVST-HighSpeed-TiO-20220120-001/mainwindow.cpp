@@ -203,6 +203,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         datatype="TiO";
         datanum=ui->lineEdit_datanum->text().toUInt();
     }
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
 
     //obslog open
 
@@ -313,7 +319,7 @@ void MainWindow::showTime()
     long t1 = current_date_time.toSecsSinceEpoch();
     float dt = (float)(t1-t0)/3600.0;
     QString angle_sign=u8"°C";
-    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" "+QString::number(dt,'f',4)+"hrs Temp: "+QString::number(temperature)+angle_sign;
+    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || System Up: "+QString::number(dt,'f',4)+"hrs || Sensor Cooling: "+QString::number(temperature)+angle_sign;
     ui->label_time->setText(current_date);
     diskname=ui->lineEdit_saveto->text();
     quint64 freeDiskSpace = getDiskSpace(diskname, false);
@@ -322,12 +328,12 @@ void MainWindow::showTime()
     if(freedisk>1000)
     {
         empty="<font style='color:green;'>"+QString::number(freeDiskSpace)+"</font>";
-        diskfree=diskname+" ---> "+empty+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
+        diskfree=empty+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     }
     else
     {
         full="<font style='color:red;'>"+QString::number(freeDiskSpace)+"</font>";
-        diskfree=diskname+" ---> "+full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
+        diskfree=full+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     }
     //QString diskfree=diskname+" ---> "+QString::number(freeDiskSpace)+"/"+QString::number(totalDiskSpace)+" GB (Free/Total)";
     ui->label_freedisk->setText(diskfree);
@@ -398,13 +404,13 @@ void MainWindow::setupStatusBar() {
     ui->statusBar->addWidget(label);
     ui->statusBar->addWidget(labelCoordMV);
 
-    label = new QLabel(this);
-    label->setText(" Saving ");
-    label->setAlignment(Qt::AlignCenter);
-    label->setMinimumWidth(20);
+    labelinfo = new QLabel(this);
+    labelinfo->setText(" 0x0 0bits ");
+    labelinfo->setAlignment(Qt::AlignCenter);
+    labelinfo->setMinimumWidth(20);
     labelStat = new QLabel(this);
     labelStat->setMinimumWidth(60);
-    ui->statusBar->addWidget(label);
+    ui->statusBar->addWidget(labelinfo);
     ui->statusBar->addWidget(labelStat);
 }
 
@@ -468,21 +474,7 @@ void MainWindow::on_btnLive_pressed() {
         if(frameRate<=0 || frameRate>200)
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
-        /*current_date_time =QDateTime::currentDateTimeUtc();
-        current_date_d =current_date_time.toString("yyyyMMdd");
-
-        save01=saveTo+current_date_d+"\\TIO\\";
-
-        savepreobj=save01+objname;
-
-        savepredf=save01+fpre;
-
-        saveDir=save01;*/
-        //qDebug()<<"live pressed:"<<saveDir;
-        //savepre =current_date_time.toString("hhmmss");
-        //connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ);
-
-        //liveTimer->start(framedelay+10);
+        labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+ " 16bits ");
     }
     else {
         live=false;
@@ -958,7 +950,9 @@ void MainWindow::on_checkBox_Data_clicked()
     ui->lineEdit_objname->setEnabled(true);
     ui->lineEdit_cor1->setEnabled(true);
     ui->lineEdit_cor2->setEnabled(true);
-
+    ui->lineEdit_datanum->setEnabled(true);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(false);
     //ui->lineEdit_objname->setEnabled(false);
     //ui->lineEdit_cor1->setEnabled(false);
     //ui->lineEdit_cor2->setEnabled(false);
@@ -970,6 +964,9 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
 
 }
 
@@ -978,4 +975,7 @@ void MainWindow::on_checkBox_Flat_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(true);
 }

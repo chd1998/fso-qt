@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1179</width>
-    <height>801</height>
+    <height>809</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>50</y>
+      <y>60</y>
       <width>801</width>
       <height>681</height>
      </rect>
@@ -77,7 +77,7 @@
      <rect>
       <x>10</x>
       <y>370</y>
-      <width>141</width>
+      <width>171</width>
       <height>31</height>
      </rect>
     </property>
@@ -86,6 +86,12 @@
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
     </property>
     <property name="text">
      <string>Start Live</string>
@@ -100,7 +106,7 @@
       <x>370</x>
       <y>10</y>
       <width>801</width>
-      <height>31</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -111,6 +117,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>12</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -118,7 +125,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Box</enum>
+     <enum>QFrame::Panel</enum>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
@@ -136,9 +143,9 @@
    <widget class="QPushButton" name="btnSnap">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>200</x>
       <y>370</y>
-      <width>141</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -147,6 +154,12 @@
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <bold>true</bold>
+     </font>
     </property>
     <property name="text">
      <string>Start Acquisition</string>
@@ -169,7 +182,7 @@
      <rect>
       <x>10</x>
       <y>410</y>
-      <width>311</width>
+      <width>351</width>
       <height>21</height>
      </rect>
     </property>
@@ -181,6 +194,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>10</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -194,7 +208,7 @@
       <x>10</x>
       <y>440</y>
       <width>351</width>
-      <height>291</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -209,7 +223,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>341</width>
+      <width>351</width>
       <height>91</height>
      </rect>
     </property>
@@ -347,7 +361,7 @@
      <rect>
       <x>10</x>
       <y>110</y>
-      <width>341</width>
+      <width>351</width>
       <height>80</height>
      </rect>
     </property>
@@ -364,7 +378,7 @@
       <rect>
        <x>150</x>
        <y>20</y>
-       <width>171</width>
+       <width>191</width>
        <height>51</height>
       </rect>
      </property>
@@ -464,7 +478,7 @@
      <rect>
       <x>10</x>
       <y>190</y>
-      <width>341</width>
+      <width>351</width>
       <height>181</height>
      </rect>
     </property>
@@ -479,9 +493,9 @@
     <widget class="QLineEdit" name="lineEdit_cor2">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>220</x>
        <y>140</y>
-       <width>111</width>
+       <width>121</width>
        <height>20</height>
       </rect>
      </property>
@@ -535,7 +549,7 @@
       <rect>
        <x>90</x>
        <y>140</y>
-       <width>101</width>
+       <width>111</width>
        <height>20</height>
       </rect>
      </property>
@@ -589,12 +603,13 @@
       <rect>
        <x>150</x>
        <y>20</y>
-       <width>171</width>
+       <width>191</width>
        <height>81</height>
       </rect>
      </property>
      <property name="font">
       <font>
+       <pointsize>12</pointsize>
        <bold>true</bold>
       </font>
      </property>
@@ -685,7 +700,7 @@
       <rect>
        <x>90</x>
        <y>110</y>
-       <width>231</width>
+       <width>251</width>
        <height>20</height>
       </rect>
      </property>

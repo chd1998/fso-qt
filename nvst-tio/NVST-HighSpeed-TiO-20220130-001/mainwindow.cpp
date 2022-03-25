@@ -212,6 +212,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         datatype="TiO";
         datanum=ui->lineEdit_datanum->text().toUInt();
     }
+    ui->lineEdit_objname->setEnabled(false);
+    ui->lineEdit_cor1->setEnabled(false);
+    ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
+
 
     //obslog open
 
@@ -408,7 +415,7 @@ void MainWindow::setupStatusBar() {
     ui->statusBar->addWidget(labelCoordMV);
 
     labelinfo = new QLabel(this);
-    labelinfo->setText(" ");
+    labelinfo->setText("0x0 0bits ");
     labelinfo->setAlignment(Qt::AlignCenter);
     labelinfo->setMinimumWidth(20);
     labelStat = new QLabel(this);
@@ -968,7 +975,9 @@ void MainWindow::on_checkBox_Data_clicked()
     ui->lineEdit_objname->setEnabled(true);
     ui->lineEdit_cor1->setEnabled(true);
     ui->lineEdit_cor2->setEnabled(true);
-
+    ui->lineEdit_datanum->setEnabled(true);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(false);
     //ui->lineEdit_objname->setEnabled(false);
     //ui->lineEdit_cor1->setEnabled(false);
     //ui->lineEdit_cor2->setEnabled(false);
@@ -980,6 +989,9 @@ void MainWindow::on_checkBox_Dark_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(true);
+    ui->lineEdit_flatnum->setEnabled(false);
 
 }
 
@@ -988,5 +1000,8 @@ void MainWindow::on_checkBox_Flat_clicked()
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+    ui->lineEdit_datanum->setEnabled(false);
+    ui->lineEdit_darknum->setEnabled(false);
+    ui->lineEdit_flatnum->setEnabled(true);
 }
 

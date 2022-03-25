@@ -145,6 +145,7 @@ private:
     QLabel *labelCoordV;
     QLabel *labelCoordMV;
     QLabel *labelStat;
+    QLabel *labelinfo;
     cv::Mat currentImage;
     QTimer *liveTimer = nullptr;
     AT_64 imageSizeBytes;
