@@ -10,6 +10,7 @@ threadB::threadB()
 void threadB::working()
 {
     //qDebug()<<"inside B";
+    QElapsedTimer t;
     while(!QThread::currentThread()->isInterruptionRequested())
     //while(!stoppedB)
     {
@@ -21,16 +22,13 @@ void threadB::working()
         //calcHist();
         if(countB != 0)
             histfirst = false;
-        if(!histlocked)
-            emit histReady();
+
         countB++;
 
         lockB.unlock();
-        QElapsedTimer t;
         t.start();
-        while(t.elapsed()<150)
+        while(t.elapsed()<100)
             QCoreApplication::processEvents();
-
 
         //if(countB==10 )
         //{
@@ -47,24 +45,26 @@ void threadB::calcHist()
     //histdata[256]{0};
     for(int i=0;i<256;i++)
         histdata[i]=0;
-    if(grayimage != nullptr && startedA)
+    //*histdata=*new int[256]{0};
+    //int *histdataback=histdata;
+    if(startedA)
     {
         histmax=0;
-        for(int i = 0; i <grayimage->height(); i++){
-                for(int j = 0; j < grayimage->width(); j++){
-                    //int index=cv::saturate_cast<int>(grayimage.ptr<cv::Vec3b>(i)[j][0]);
-                    //int index=grayimage.ptr<cv::Vec3b>(i)[j][0];
-                    int index=grayimage->pixelIndex(i,j);
+        for(int i = 0; i <grayimage.height(); i++){
+                for(int j = 0; j < grayimage.width(); j++){
+                    int index=grayimage.pixelIndex(i,j);
                     ++histdata[index];
                     if(histdata[index]>histmax)
                     {
                         histmax=histdata[index];
                         idx=index;
                     }
-                    //oldhistdata[index]=histdata[index];
                 }
             }
+        if(!histlocked)
+            emit histReady();
     }
+    //delete histdataback;
 }
 //void threadB::finished()
 //{

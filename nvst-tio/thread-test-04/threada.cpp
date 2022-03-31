@@ -6,16 +6,17 @@ threadA::threadA()
     countA=0;
     src="A";
 
+
 }
 
 void threadA::working()
 {
-    grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
-    grayimage = new QImage(imgX,imgY,QImage::Format_Indexed8);
-    myImage= new unsigned short[imgX*imgY];
-
+    QElapsedTimer t;
     while(!QThread::currentThread()->isInterruptionRequested())
     {
+        QImage grayimage16 = QImage(imgX,imgY,QImage::Format_Grayscale16);
+        grayimage = QImage(imgX,imgY,QImage::Format_Indexed8);
+        myImage= new unsigned short[imgX*imgY];
 
         lockA.lock();
         int row=imgY;
@@ -25,30 +26,31 @@ void threadA::working()
         {
             for(int j=0;j< col;j++)
             {
-             //a[i][j] = QRandomGenerator::global()->bounded(0,65535);
-             //grayimage16->setPixelColor(i,j,QRandomGenerator::global()->bounded(0,65535));
-             myImage[j+i*row]=QRandomGenerator::global()->bounded(0,65535);
-             //qDebug()<<grayimage.pixel(i,j);
-             //qDebug()<<a[i][j];
+                myImage[j+i*row]=QRandomGenerator::global()->bounded(0,65535);
             }
         }
-        *grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
-        *grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
+        grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
+        grayimage=grayimage16.convertToFormat(QImage::Format_Indexed8);
         emit fromA(src,countA);
-        if(!imglocked)
+        if(!imglocked || !histlocked)
             emit imgReady();
         countA++;
         lockA.unlock();
         //qDebug()<<"inside A-03";
-        QElapsedTimer t;
         t.start();
         while(t.elapsed()<100)
             QCoreApplication::processEvents();
 
+        //grayimage16=NULL;
+        //grayimage=NULL;
+        //myImage=NULL;
+        //delete grayimage16;
+        //delete grayimage;
+        delete myImage;
+
     }
-    delete grayimage16;
-    delete grayimage;
-    delete myImage;
+
+
 }
 
 //void threadA::finished()

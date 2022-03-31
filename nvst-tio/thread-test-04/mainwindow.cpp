@@ -3,10 +3,10 @@
 
 bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true;
 QMutex lockA,lockB,imglock,histlock;
-QImage *grayimage,*grayimage16;
+QImage grayimage,grayimage16;
 int imgX=1024,imgY=1024;
 int histdata[256]{0},oldhistdata[256]{0};
-int histmax=0,idx=0;
+int histmax=0,idx=128;
 QBarSet *set = nullptr;
 QBarSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
@@ -33,6 +33,50 @@ MainWindow::MainWindow(QWidget *parent)
 
     imgscene = new QGraphicsScene();
     ui->imgView->setScene(imgscene);
+
+    set = new QBarSet("GrayScale");
+    for (int i=0;i<256;i++) {
+       //set->replace(i,histdata[i]);
+        set->append(histdata[i]);
+       //if(yRange<histdata[i]) yRange = histdata[i];
+       set->setColor(QColor::Rgb);
+
+    }
+
+    series = new QBarSeries();
+    series->append(set);
+    series->setBarWidth(1);
+    series->setUseOpenGL(true);
+
+    axisX = new QCategoryAxis();
+    axisX->setMin(0);
+    axisX->setMax(255);
+    axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+    axisX->append(QString::number(0),0);
+    QString tmpstring = QString::number(idx*65536/256);
+    axisX->append("<font color=\"red\">"+tmpstring+"</font>", idx);
+    axisX->append(QString::number(65535),255);
+
+    axisY = new QValueAxis();
+
+    chart = new QChart();
+    chart->setContentsMargins(0,0,0,0);
+    //left,top,right,bottom
+    chart->setMargins(QMargins(0,0,15,0));
+    chart->setAutoFillBackground(true);
+    chart->addSeries(series);
+    //chart->createDefaultAxes();
+    chart->addAxis(axisX,Qt::AlignBottom);
+    chart->addAxis(axisY,Qt::AlignLeft);
+    chart->setTitle("Image Histrogram");
+    chart->legend()->hide();
+
+    ui->hist_chartview->setChart(chart);
+    ui->hist_chartview->resize(ui->hist_chartview->width(),ui->hist_chartview->height());
+    ui->hist_chartview->resize(521,131);
+    ui->hist_chartview->setRenderHint(QPainter::Antialiasing);
+    ui->hist_chartview->setVisible(true);
+
 }
 
 void MainWindow::updateStatus(QString src,int count)
@@ -308,7 +352,7 @@ void MainWindow::updateImg()
     imglocked = true;
     imgscene->clear();
     ui->imgView->update();
-    item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage));
+    item = new QGraphicsPixmapItem(QPixmap::fromImage(grayimage));
     imgscene->addItem(item);
     imgscene->setSceneRect(QRectF(0, 0, imgscene->height(), imgscene->width()));
     //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
@@ -318,6 +362,7 @@ void MainWindow::updateImg()
     ui->imgView->update();
     imglock.unlock();
     imglocked = false;
+    //delete grayimage;
 }
 
 void MainWindow::updateHist()
@@ -325,94 +370,39 @@ void MainWindow::updateHist()
 
 
     histlock.lock();
+
     histlocked=true;
-    if(!histfirst)
-    {
-        delete set;
-        delete series;
-        delete axisX;
-        delete axisY;
-        //chart->removeAllSeries();
-        //qDebug()<<chart;
-        //delete chart;
-    }
+
     int yRange = 0;
-    //QBarSet *set = new QBarSet("GrayScale");
-    set = new QBarSet("GrayScale");
+    //series->remove(set);
+    chart->removeSeries(series);
     for (int i=0;i<256;i++) {
-       //if(histfirst)
-            set->append(histdata[i]);
-       //else
-       //{
-         // if(oldhistdata[i] != histdata[i] )
-         // {
-         //   set->insert(i,histdata[i]);
-          //  oldhistdata[i]=histdata[i];
-         // }
-
-       //}
-
-
+       //set->replace(i,histdata[i]);
+        set->replace(i,histdata[i]);
        if(yRange<histdata[i]) yRange = histdata[i];
        set->setColor(QColor::Rgb);
-
     }
-    series = new QBarSeries();
-    //series->replace(set);
     series->append(set);
-    series->setBarWidth(1);
-    series->setUseOpenGL(true);
+    chart->addSeries(series);
 
-    //设置横坐标
+    chart->removeAxis(axisX);
+    delete axisX;
     axisX = new QCategoryAxis();
     axisX->setMin(0);
     axisX->setMax(255);
-    //axisX->setStartValue(0);
-    //axisX->setLabelsColor(QColor(0,0,0));
-    axisX->append(QString::number(0),0);
-    //axisX->setLabelsColor(QColor(0,0,255));
-    QString tmpstring = QString::number(idx*65536/256);
-    //axisX->append("<font color=\"red\">"+tmpstring+"</font>", idx);
-    axisX->append("<font color=\"red\">"+tmpstring+"</font>", idx);
-    //axisX.re
-    //axisX->append(QString::number(idx*65535/255),idx);
-    //axisX->setLabelsColor(QColor(0,0,0));
-    axisX->append(QString::number(65535),255);
     axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-
-
-    //设置纵坐标
-    axisY = new QValueAxis();
-    //axisY->setLabelFormat("%d");
-    //axisY->setRange(0,yRange);
-
-    //建表
-    chart = new QChart();
-    chart->setContentsMargins(0,0,0,0);
-    chart->setMargins(QMargins(0,0,0,0));
-    chart->setAutoFillBackground(true);
-    chart->addSeries(series);
-    //chart->createDefaultAxes();
+    axisX->append(QString::number(0),0);
+    QString tmpstring = QString::number(idx*65536/256);
+    axisX->append("<font color=\"red\">"+tmpstring+"</font>", idx);
+    qDebug()<<"idx= "<<idx*65536/256;
+    axisX->append(QString::number(65535),255);
     chart->addAxis(axisX,Qt::AlignBottom);
-    chart->addAxis(axisY,Qt::AlignLeft);
-    //chart->setTitle("Image Histrogram");
-    chart->legend()->hide();
-    //chart->setAnimationOptions(QChart::SeriesAnimations);
-    //chart->legend()->setVisible(true);
 
-    //表的容器
-    ui->hist_chartview->setChart(chart);
-    //ui->hist_chartview->resize(ui->hist_chartview->width(),ui->hist_chartview->height());
-    ui->hist_chartview->resize(521,131);
-    ui->hist_chartview->setRenderHint(QPainter::Antialiasing);
-    ui->hist_chartview->setVisible(true);
-
+    ui->hist_chartview->update();
 
     histlock.unlock();
     histlocked=false;
-    //chart->removeAllSeries();
-    //chart->removeAxis(axisX);
-    //chart->removeAxis(axisY);
+
 
 }
 

@@ -13,7 +13,7 @@
 extern  QMutex lockA,lockB,imglock,histlock;
 extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst;
 extern  int imgX,imgY;
-extern  QImage *grayimage,*grayimage16;
+extern  QImage grayimage;
 extern  int histdata[256],oldhistdata[256];
 extern  int histmax,idx;
 extern QBarSet *set ;
