@@ -35,13 +35,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     imgscene = new QGraphicsScene();
     ui->imgView->setScene(imgscene);
-    int yRange=0;
-    set = new QBarSet("GrayScale");
-    for (int i=0;i<65536;i++) {
-       set->replace(i,vechistdata.at(i));
-       if(yRange<vechistdata.at(i)) yRange = vechistdata.at(i);
-       set->setColor(QColor::Rgb);
 
+    set = new QBarSet("GrayScale");
+    for (int i=0;i<65536;++i) {
+       set->replace(i,vechistdata[i]);
+       set->setColor(QColor::Rgb);
     }
     series = new QBarSeries();
     //series->replace(set);
@@ -53,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     axisX = new QCategoryAxis();
     axisX->setMin(0);
     axisX->setMax(65535);
+    axisX->setTickCount(10);
     axisX->append(QString::number(0),0);
     //axisX->setLabelsColor(QColor(0,0,255));
     QString tmpstring = QString::number(histindex);
@@ -64,20 +63,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     //设置纵坐标
     axisY = new QValueAxis();
-    axisY->setTickCount(2);
+    axisY->setTickCount(3);
     axisY->setLabelFormat("%d");
-    axisY->setRange(0,yRange);
+    axisY->setRange(0,histmax);
 
     //建表
     chart = new QChart();
     chart->setContentsMargins(0,0,0,0);
-    chart->setMargins(QMargins(5,0,15,0));
+    chart->setMargins(QMargins(15,0,15,0));
     chart->setAutoFillBackground(true);
     chart->addSeries(series);
     //chart->createDefaultAxes();
     chart->addAxis(axisX,Qt::AlignBottom);
     chart->addAxis(axisY,Qt::AlignLeft);
-    //chart->setTitle("Image Histrogram");
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
+    chart->setTitle("Image Histrogram");
     chart->legend()->hide();
     //chart->setAnimationOptions(QChart::SeriesAnimations);
     //chart->legend()->setVisible(true);
@@ -86,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->hist_chartview->setChart(chart);
     //ui->hist_chartview->resize(ui->hist_chartview->width(),ui->hist_chartview->height());
     ui->hist_chartview->resize(521,131);
-    ui->hist_chartview->setRenderHint(QPainter::Antialiasing);
+    //ui->hist_chartview->setRenderHint(QPainter::Antialiasing);
     ui->hist_chartview->setVisible(true);
 }
 
@@ -95,11 +96,11 @@ void MainWindow::updateStatus(QString src,int count)
 
     if(src == "A")
     {
-        ui->textEdit_StatusA->append(src+" , "+QString::number(count));
+        ui->textEdit_StatusA->append(src+": count="+QString::number(count));
     }
     if(src == "B")
     {
-        ui->textEdit_StatusB->append(src+" , "+QString::number(count)+": "+QString::number(histmax)+" - "+QString::number(histindex));
+        ui->textEdit_StatusB->append(src+": count="+QString::number(count)+" Max="+QString::number(histmax)+" idx="+QString::number(histindex));
     }
 }
 
@@ -382,7 +383,7 @@ void MainWindow::updateImg()
     imglocked = false;
 }
 
-void MainWindow::updateHist()
+void MainWindow::updateHist(std::vector<unsigned short> tmphistdata,int tmphistmax,int tmphistindex)
 {
 
 
@@ -390,42 +391,42 @@ void MainWindow::updateHist()
 
     histlocked=true;
 
-    int yRange = 0;
+    //int yRange = 0;
 
     chart->removeSeries(series);
-
-    //set = new QBarSet("GrayScale");
-    for (int i=0;i<65536;i++) {
-       //set->insert(i,vechistdata.at(i));
-       set->replace(i,vechistdata.at(i));
-       if(yRange<vechistdata.at(i)) yRange = vechistdata.at(i);
+    for (int i=0;i<65536;++i) {
+       set->replace(i,tmphistdata[i]);
        set->setColor(QColor::Rgb);
     }
-    series->append(set);    
+    series->append(set);
+    series->show();
 
     chart->removeAxis(axisX);
     delete axisX;
     axisX = new QCategoryAxis();
     axisX->setMin(0);
     axisX->setMax(65535);
+    axisX->setTickCount(10);
     axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->append(QString::number(0),0);
-    QString tmpstring = QString::number(histindex);
-    axisX->append("<font color=\"red\">"+tmpstring+"</font>", histindex);
-    //qDebug()<<"idx= "<<histindex<<" "<<histmax;
+    QString tmpstring = QString::number(tmphistindex);
+    axisX->append("<font color=\"red\">"+tmpstring+"</font>", tmphistindex);
     axisX->append(QString::number(65535),65535);
 
     chart->removeAxis(axisY);
     delete axisY;
     axisY = new QValueAxis();
-    axisY->setTickCount(2);
+    axisY->setTickCount(3);
     axisY->setLabelFormat("%d");
-    axisY->setRange(0,yRange);
+    axisY->setRange(0,tmphistmax);
 
     chart->addSeries(series);
     chart->addAxis(axisX,Qt::AlignBottom);
     chart->addAxis(axisY,Qt::AlignLeft);
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
 
+    ui->hist_chartview->setVisible(true);
     ui->hist_chartview->update();
 
     histlock.unlock();

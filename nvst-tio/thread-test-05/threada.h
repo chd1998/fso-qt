@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 #include <QCoreApplication>
 #include <QThread>
+#include <complex>
 
 class threadA : public QObject
 {

@@ -47,27 +47,28 @@ void threadB::calcHist()
         //std::vector<unsigned short> vecimg(myImageBack,myImageBack+sizeof(*myImageBack)/sizeof(myImageBack[0]));
         //std::vector<int>::iterator it;
         //int len=sizeof(*myImageBack)/sizeof(myImageBack[0]);
-        qDebug()<<"Len: "<<vecimg.size();
+        //qDebug()<<"Len: "<<vecimg.size();
         //for(int i=0;i < len; ++i)
         for(uint i=0;i != vecimg.size();++i)
         {
             int idx=vecimg.at(i);
             //qDebug()<<"i: "<<i<<" Value: "<<vecimg.at(i);
-            vechistdata.at(idx)=vechistdata.at(idx)+1;
+            ++vechistdata[idx];
             //()<<"idx="<<idx<<" Value="<<vechistdata.at(idx);
-            if(vechistdata.at(idx)>histmax)
+            if(vechistdata[idx]>histmax)
             {
-                histmax=vechistdata.at(idx);
+                histmax=vechistdata[idx];
                 histindex=idx;
             }
+            //std::cout<<idx<<"@"<<vechistdata[idx]<<std::endl;
        }
     }
     //qDebug()<<"idx= "<<histindex<<" max= "<<histmax<<" value= "<<vecimg.at(32768);
     //std::sort(std::execution::par_unseq, vechistdata.begin(), vechistdata.end());
-    qDebug()<<"idx="<<histindex<<" Value="<<vechistdata.at(histindex);
+    //qDebug()<<"idx="<<histindex<<" Value="<<vechistdata.at(histindex);
     histfinished=true;
     if(!histlocked)
-        emit histReady();
+        emit histReady(vechistdata,histmax,histindex);
 }
 //void threadB::finished()
 //{

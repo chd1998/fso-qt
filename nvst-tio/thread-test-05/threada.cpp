@@ -1,5 +1,6 @@
 #include "threada.h"
 #include "mainwindow.h"
+#include <complex>
 
 threadA::threadA()
 {
@@ -27,8 +28,9 @@ void threadA::working()
             for(int j=0;j< col;j++)
             {
                 //myImage[j+i*row]=(unsigned short)QRandomGenerator::global()->bounded(0,65535);
-                myImage[j+i*row]=QRandomGenerator::global()->bounded(20000,42000);
-                vecimg.at(j+i*row)=myImage[j+i*row];
+                int randnum=QRandomGenerator::global()->bounded(5000,42000);
+                myImage[j+i*row]=randnum;
+                vecimg[j+i*row]=myImage[j+i*row];
             }
         }
         emit fromA(src,countA);

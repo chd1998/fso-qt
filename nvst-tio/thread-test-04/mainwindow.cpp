@@ -58,11 +58,14 @@ MainWindow::MainWindow(QWidget *parent)
     axisX->append(QString::number(65535),255);
 
     axisY = new QValueAxis();
+    axisY->setTickCount(3);
+    axisY->setLabelFormat("%d");
+    axisY->setRange(0,histmax);
 
     chart = new QChart();
     chart->setContentsMargins(0,0,0,0);
     //left,top,right,bottom
-    chart->setMargins(QMargins(0,0,15,0));
+    chart->setMargins(QMargins(15,0,15,0));
     chart->setAutoFillBackground(true);
     chart->addSeries(series);
     //chart->createDefaultAxes();
@@ -385,6 +388,13 @@ void MainWindow::updateHist()
     series->append(set);
     chart->addSeries(series);
 
+    chart->removeAxis(axisY);
+    delete axisY;
+    axisY = new QValueAxis();
+    axisY->setTickCount(3);
+    axisY->setLabelFormat("%d");
+    axisY->setRange(0,histmax);
+
     chart->removeAxis(axisX);
     delete axisX;
     axisX = new QCategoryAxis();
@@ -397,6 +407,8 @@ void MainWindow::updateHist()
     qDebug()<<"idx= "<<idx*65536/256;
     axisX->append(QString::number(65535),255);
     chart->addAxis(axisX,Qt::AlignBottom);
+    chart->addAxis(axisY,Qt::AlignLeft);
+
 
     ui->hist_chartview->update();
 

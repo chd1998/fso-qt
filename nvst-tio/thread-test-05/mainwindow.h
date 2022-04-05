@@ -57,7 +57,7 @@ private:
 private slots:
     void updateStatus(QString,int);
     void updateImg();
-    void updateHist();
+    void updateHist(std::vector<unsigned short>,int,int);
     void pauseThread(QString);
     void on_btn_start_A_clicked();
     void on_btn_pause_A_clicked();
