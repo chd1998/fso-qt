@@ -370,7 +370,7 @@ void MainWindow::updateImg()
 {
     imglock.lock();
     imglocked = true;
-    if(!pausedA || startedA)
+    if((!pausedA || !stoppedA) && startedA)
     {
         *grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
         *grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
@@ -395,7 +395,7 @@ void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,i
     histlock.lock();
 
     histlocked=true;
-    if(!stoppedB)
+    if(startedA && (startedB && !pausedB) )
     {
         chart->removeSeries(series);
         delete lineseries;
