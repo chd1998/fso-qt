@@ -39,7 +39,7 @@ void threadB::working()
 }
 void threadB::calcHist()
 {
-    std::vector<unsigned short>vechistdata(65536,0);
+    QVector<unsigned short>vechistdata(65536,0);
 
     histmax=0;
     if(startedA)

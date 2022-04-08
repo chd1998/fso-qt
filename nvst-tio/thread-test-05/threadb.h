@@ -24,7 +24,7 @@ public:
 
 signals:
     void fromB(QString,int);
-    void histReady(std::vector<unsigned short>,int,int);
+    void histReady(QVector<unsigned short>,int,int);
     void finished(QString);
 
 public slots:
