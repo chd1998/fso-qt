@@ -12,14 +12,13 @@
 
 extern  QMutex lockA,lockB,imglock,histlock;
 extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst;
-extern  int imgX,imgY,frameRate,histRate;
+extern  int imgX,imgY,frameRate,histRate,low,high;
 extern  QImage *grayimage,*grayimage16;
 //extern  int *histdata;
 extern QVector<unsigned short>vecimg;
 extern QVector<unsigned short>vechistdata;
 extern int histmax,histindex;
 //extern QBarSet *set ;
-
 extern QLineSeries *lineseries ;
 extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;

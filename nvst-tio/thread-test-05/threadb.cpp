@@ -15,7 +15,8 @@ void threadB::working()
     //while(!stoppedB)
     {
         lockB.lock();
-        emit fromB(src,countB);
+        if(!stoppedB || !pausedB)
+            emit fromB(src,countB);
 
         //calcHist();
         if(countB != 0)

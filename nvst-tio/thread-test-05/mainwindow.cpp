@@ -4,7 +4,7 @@
 bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true;
 QMutex lockA,lockB,imglock,histlock;
 QImage *grayimage,*grayimage16;
-int imgX=1024,imgY=1024,frameRate=100,histRate=200;
+int imgX=1024,imgY=1024,frameRate=100,histRate=200,low=20000,high=42000;
 QVector<unsigned short>vecimg(imgX*imgY,0);
 QVector<unsigned short>vechistdata(65536,0);
 int histmax=0,histindex=32768;
@@ -139,6 +139,12 @@ void MainWindow::on_btn_start_A_clicked()
 {
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
+    low=ui->lineEdit_low->text().toInt();
+    high=ui->lineEdit_high->text().toInt();
+    if(low<0 || low>65535)
+        low=20000;
+    if(high>65535 || high<0)
+        high=42000;
     frameRate=ui->lineEdit_framerate->text().toInt();
     histRate=ui->lineEdit_histrate->text().toInt();
     thread1 = new QThread( );
@@ -362,20 +368,23 @@ void MainWindow::closeP()
 
 void MainWindow::updateImg()
 {
-    *grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
-    *grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
     imglock.lock();
     imglocked = true;
-    imgscene->clear();
-    ui->imgView->update();
-    item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage));
-    imgscene->addItem(item);
-    imgscene->setSceneRect(QRectF(0, 0, imgscene->height(), imgscene->width()));
-    //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
-    //imgscene->setSceneRect(QRectF(0, 0, imgX,imgY));
-    ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
-    //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
-    ui->imgView->update();
+    if(!pausedA || startedA)
+    {
+        *grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
+        *grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
+        imgscene->clear();
+        ui->imgView->update();
+        item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage));
+        imgscene->addItem(item);
+        imgscene->setSceneRect(QRectF(0, 0, imgscene->height(), imgscene->width()));
+        //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
+        //imgscene->setSceneRect(QRectF(0, 0, imgX,imgY));
+        ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
+        //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
+        ui->imgView->update();
+    }
     imglock.unlock();
     imglocked = false;
 }
@@ -383,58 +392,56 @@ void MainWindow::updateImg()
 void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,int tmphistindex)
 {
 
-
     histlock.lock();
 
     histlocked=true;
+    if(!stoppedB)
+    {
+        chart->removeSeries(series);
+        delete lineseries;
+        delete series;
+        lineseries=new QLineSeries();
 
-    //int yRange = 0;
-    //lineseries->remove();
-    //chart->removeSeries(lineseries);
-    chart->removeSeries(series);
-    delete lineseries;
-    delete series;
-    lineseries=new QLineSeries();
-    //series->clear();
-    for (int i=0;i<65536;++i) {
-       lineseries->append(QPointF(i,tmphistdata[i]));
+        for (int i=0;i<65536;++i) {
+           lineseries->append(QPointF(i,tmphistdata[i]));
+        }
+        lineseries->setColor(Qt::black);
+
+        series = new QAreaSeries(lineseries);
+        series->setName("Histogram");
+        QPen pen(Qt::black);
+        pen.setWidth(1);
+        series->setPen(pen);
+        QBrush brush;
+        brush.setColor(Qt::black);//画刷颜色
+        brush.setStyle(Qt::SolidPattern);//画刷填充样式，斜网格
+        series->setBrush(brush);
+
+        chart->removeAxis(axisX);
+        delete axisX;
+        axisX = new QCategoryAxis();
+        axisX->setMin(0);
+        axisX->setMax(65535);
+        axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+        axisX->append(QString::number(0),0);
+        QString tmpstring = QString::number(histindex);
+        axisX->append("<font color=\"red\">"+tmpstring+"</font>", histindex);
+        axisX->append(QString::number(65535),65535);
+
+        chart->removeAxis(axisY);
+        delete axisY;
+        axisY = new QValueAxis();
+        axisY->setTickCount(3);
+        axisY->setLabelFormat("%d");
+        axisY->setRange(0,tmphistmax);
+
+        chart->addSeries(series);
+        chart->addAxis(axisX,Qt::AlignBottom);
+        chart->addAxis(axisY,Qt::AlignLeft);
+
+        ui->hist_chartview->setVisible(true);
+        ui->hist_chartview->update();
     }
-    lineseries->setColor(Qt::black);
-
-    series = new QAreaSeries(lineseries);
-    series->setName("Histogram");
-    QPen pen(Qt::black);
-    pen.setWidth(1);
-    series->setPen(pen);
-    QBrush brush;
-    brush.setColor(Qt::black);//画刷颜色
-    brush.setStyle(Qt::SolidPattern);//画刷填充样式，斜网格
-    series->setBrush(brush);
-
-    chart->removeAxis(axisX);
-    delete axisX;
-    axisX = new QCategoryAxis();
-    axisX->setMin(0);
-    axisX->setMax(65535);
-    axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-    axisX->append(QString::number(0),0);
-    QString tmpstring = QString::number(histindex);
-    axisX->append("<font color=\"red\">"+tmpstring+"</font>", histindex);
-    axisX->append(QString::number(65535),65535);
-
-    chart->removeAxis(axisY);
-    delete axisY;
-    axisY = new QValueAxis();
-    axisY->setTickCount(3);
-    axisY->setLabelFormat("%d");
-    axisY->setRange(0,tmphistmax);
-
-    chart->addSeries(series);
-    chart->addAxis(axisX,Qt::AlignBottom);
-    chart->addAxis(axisY,Qt::AlignLeft);
-
-    ui->hist_chartview->setVisible(true);
-    ui->hist_chartview->update();
 
     histlock.unlock();
     histlocked=false;

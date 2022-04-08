@@ -28,18 +28,15 @@ void threadA::working()
             for(int j=0;j< col;j++)
             {
                 //myImage[j+i*row]=(unsigned short)QRandomGenerator::global()->bounded(0,65535);
-                int randnum=QRandomGenerator::global()->bounded(20000,42000);
+                int randnum=QRandomGenerator::global()->bounded(low,high);
                 myImage[j+i*row]=randnum;
                 vecimg[j+i*row]=myImage[j+i*row];
             }
         }
-        emit fromA(src,countA);
+        if(!stoppedA || !pausedA)
+            emit fromA(src,countA);
         if(!imglocked || !histlocked)
         {
-            //std::vector<unsigned short> vecimg(myImage,myImage+sizeof(*myImage)/sizeof(myImage[0]));
-            //std::vector<unsigned short> vecimg(sizeof(*myImage)/sizeof(myImage[0]));
-            //memcpy(&vecimg[0], myImage, sizeof(*myImage));
-            //qDebug()<<"img size: "<<vecimg.size()<<" Value: "<<vecimg.at(32768);
             emit imgReady();
         }
         countA++;
