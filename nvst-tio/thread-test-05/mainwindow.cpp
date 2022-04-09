@@ -141,10 +141,16 @@ void MainWindow::on_btn_start_A_clicked()
     imgY=ui->lineEdit_imgy->text().toInt();
     low=ui->lineEdit_low->text().toInt();
     high=ui->lineEdit_high->text().toInt();
-    if(low<0 || low>65535)
+    if( low >= high )
+    {
         low=20000;
-    if(high>65535 || high<0)
         high=42000;
+    }else{
+        if(low<0 || low>65535)
+            low=20000;
+        if(high>65535 || high<0)
+            high=42000;
+    }
     frameRate=ui->lineEdit_framerate->text().toInt();
     histRate=ui->lineEdit_histrate->text().toInt();
     thread1 = new QThread( );
