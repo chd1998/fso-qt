@@ -291,9 +291,6 @@ void MainWindow::on_btn_resume_B_clicked()
 
 }
 
-
-
-
 void MainWindow::on_btn_stopB_pressed()
 {
     if(pausedB)
@@ -384,14 +381,13 @@ void MainWindow::updateImg()
     if(grayimage16 != NULL)
     {
         delete grayimage16;
-
     }
     grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
     if((!pausedA || !stoppedA) && startedA && nullptr != myImage )
     {
         //*grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
         //*grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
-        *grayimage16 = QImage(reinterpret_cast< uchar* >( myImage ),imgX,imgY,QImage::Format_Grayscale16);
+        *grayimage16 = QImage(reinterpret_cast< uchar* >( myImage ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
         imgscene->clear();
         ui->imgView->update();
         item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
@@ -400,8 +396,10 @@ void MainWindow::updateImg()
         //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
         //imgscene->setSceneRect(QRectF(0, 0, imgX,imgY));
         ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
+        //ui->imgView->resize(521,421);
         //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
         ui->imgView->update();
+        //delete item;
     }
 
     imglock.unlock();
