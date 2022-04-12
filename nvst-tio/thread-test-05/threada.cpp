@@ -11,46 +11,50 @@ threadA::threadA()
 
 void threadA::working()
 {
-    grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
-    grayimage = new QImage(imgX,imgY,QImage::Format_Indexed8);
-    myImage= new unsigned short[imgX*imgY];
-    myImageBack=myImage;
+    qDebug()<<"1: "<<imgX<<" "<<imgY<<" "<<vecimg.size();
+    //grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+    //grayimage = new QImage(imgX,imgY,QImage::Format_Indexed8);
+
+
 
     while(!QThread::currentThread()->isInterruptionRequested())
     {
 
         lockA.lock();
-        int row=imgY;
-        int col=imgX;
+        vecimg.clear();
        //generate random data
-        for(int i = 0 ;i < row ;i++)
+        syncAB=false;
+        for(int i = 0 ;i < imgY*imgX ;i++)
         {
-            for(int j=0;j< col;j++)
-            {
+
                 //myImage[j+i*row]=(unsigned short)QRandomGenerator::global()->bounded(0,65535);
                 int randnum=QRandomGenerator::global()->bounded(low,high);
-                myImage[j+i*row]=randnum;
-                vecimg[j+i*row]=myImage[j+i*row];
-            }
+                myImage[i]=randnum;
+                vecimg.append(randnum);
+
         }
+        syncAB=true;
         if(!stoppedA || !pausedA)
             emit fromA(src,countA);
         if(!imglocked || !histlocked)
         {
-            emit imgReady();
+            emit imgReady(vecimg);
         }
         countA++;
         lockA.unlock();
-        //qDebug()<<"inside A-03";
+        //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);
         QElapsedTimer t;
         t.start();
         while(t.elapsed()<frameRate)
             QCoreApplication::processEvents();
+        //delete grayimage16;
+        //delete grayimage;
+        //delete[] myImageBack;
 
     }
-    delete grayimage16;
-    delete grayimage;
-    delete[] myImageBack;
+    //delete grayimage16;
+    //delete grayimage;
+    //delete[] myImageBack;
 }
 
 //void threadA::finished()

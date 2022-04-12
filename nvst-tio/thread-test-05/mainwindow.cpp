@@ -1,11 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true;
+bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,syncAB=false;
 QMutex lockA,lockB,imglock,histlock;
 QImage *grayimage,*grayimage16;
-int imgX=1024,imgY=1024,frameRate=100,histRate=200,low=20000,high=42000;
-QVector<unsigned short>vecimg(imgX*imgY,0);
+int imgX0=1024,imgY0=1024,imgX,imgY,frameRate=100,histRate=200,low=20000,high=42000;
+QVector<unsigned short>vecimg(imgX0*imgY0,0);
 QVector<unsigned short>vechistdata(65536,0);
 int histmax=0,histindex=32768;
 //QBarSet *set = nullptr;
@@ -14,7 +14,7 @@ QAreaSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-unsigned short *myImage,*myImageBack=nullptr;
+unsigned short *myImage=nullptr,*myImageBack=nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->hist_chartview->resize(521,131);
     //ui->hist_chartview->setRenderHint(QPainter::Antialiasing);
     ui->hist_chartview->setVisible(true);
+    //histfinished=false;
 }
 
 void MainWindow::updateStatus(QString src,int count)
@@ -139,6 +140,9 @@ void MainWindow::on_btn_start_A_clicked()
 {
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
+    vecimg.resize(imgX*imgY,0);
+    myImage= new unsigned short[imgX*imgY];
+    myImageBack=myImage;
     low=ui->lineEdit_low->text().toInt();
     high=ui->lineEdit_high->text().toInt();
     if( low >= high )
@@ -219,6 +223,7 @@ void MainWindow::on_btn_stopA_pressed()
             qDebug()<<"Waiting...";
         }
         thread1->deleteLater();
+        delete[] myImageBack;
         startedA=false;
     }
 
@@ -376,21 +381,29 @@ void MainWindow::updateImg()
 {
     imglock.lock();
     imglocked = true;
-    if((!pausedA || !stoppedA) && startedA)
+    if(grayimage16 != NULL)
     {
-        *grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
-        *grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
+        delete grayimage16;
+
+    }
+    grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+    if((!pausedA || !stoppedA) && startedA && nullptr != myImage )
+    {
+        //*grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
+        //*grayimage=grayimage16->convertToFormat(QImage::Format_Indexed8);
+        *grayimage16 = QImage(reinterpret_cast< uchar* >( myImage ),imgX,imgY,QImage::Format_Grayscale16);
         imgscene->clear();
         ui->imgView->update();
-        item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage));
+        item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
         imgscene->addItem(item);
-        imgscene->setSceneRect(QRectF(0, 0, imgscene->height(), imgscene->width()));
+        imgscene->setSceneRect(QRectF(0, 0, imgY, imgX));
         //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
         //imgscene->setSceneRect(QRectF(0, 0, imgX,imgY));
         ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
         //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
         ui->imgView->update();
     }
+
     imglock.unlock();
     imglocked = false;
 }
@@ -398,8 +411,8 @@ void MainWindow::updateImg()
 void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,int tmphistindex)
 {
 
-    histlock.lock();
 
+    histlock.lock();
     histlocked=true;
     if(startedA && (startedB && !pausedB) )
     {
@@ -430,8 +443,8 @@ void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,i
         axisX->setMax(65535);
         axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
         axisX->append(QString::number(0),0);
-        QString tmpstring = QString::number(histindex);
-        axisX->append("<font color=\"red\">"+tmpstring+"</font>", histindex);
+        QString tmpstring = QString::number(tmphistindex);
+        axisX->append("<font color=\"red\">"+tmpstring+"</font>", tmphistindex);
         axisX->append(QString::number(65535),65535);
 
         chart->removeAxis(axisY);
@@ -451,7 +464,6 @@ void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,i
 
     histlock.unlock();
     histlocked=false;
-
 
 }
 

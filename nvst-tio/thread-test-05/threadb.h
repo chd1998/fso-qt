@@ -20,7 +20,7 @@ public:
     QString src;
     int countB;
     void working();
-    bool histfinished;
+    //bool histfinished;
 
 signals:
     void fromB(QString,int);
@@ -28,7 +28,7 @@ signals:
     void finished(QString);
 
 public slots:
-    void calcHist();
+    void calcHist(QVector<unsigned short>);
 
 };
 

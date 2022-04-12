@@ -21,7 +21,7 @@ public:
 
 signals:
     void fromA(QString,int);
-    void imgReady();
+    void imgReady(QVector<unsigned short>);
     void finished(QString);
 
 };

@@ -11,8 +11,8 @@
 #include <QGraphicsScene>
 
 extern  QMutex lockA,lockB,imglock,histlock;
-extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst;
-extern  int imgX,imgY,frameRate,histRate,low,high;
+extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,syncAB;
+extern  int imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
 extern  QImage *grayimage,*grayimage16;
 //extern  int *histdata;
 extern QVector<unsigned short>vecimg;
@@ -24,7 +24,7 @@ extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern unsigned short * myImage,*myImageBack;
+extern unsigned short *myImage,*myImageBack;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,6 +49,8 @@ public:
 
     QGraphicsPixmapItem *item = nullptr;
     QGraphicsScene *imgscene = nullptr;
+
+    //static bool histfinished;
 
 
 
