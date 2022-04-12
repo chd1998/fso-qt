@@ -252,10 +252,12 @@ void aCCD::getData()
          if(NULL != unpackedBufferback)
          {
             //imgMax=*std::max_element(unpackedBufferback,unpackedBufferback+len);
-            uint len=sizeof(*unpackedBufferback)/sizeof(unpackedBufferback);
-            emit buf_Ready(unpackedBufferback,len);
-            //if(imgready)
-            emit histReady(unpackedBufferback);
+            //uint len=sizeof(*unpackedBufferback)/sizeof(unpackedBufferback);
+            if(!display)
+            {
+                emit buf_Ready(unpackedBufferback);
+                emit histReady(unpackedBufferback);
+            }
             histfirst=false;
          }
          //qDebug()<<"Saving : "<<QString::number(fserialNo);

@@ -45,7 +45,7 @@ public:
 
     //int serialNo=0;
 signals:
-    void buf_Ready(unsigned short*,uint);
+    void buf_Ready(unsigned short*);
     void histReady(unsigned short*);
     void stop_Acq();
 };

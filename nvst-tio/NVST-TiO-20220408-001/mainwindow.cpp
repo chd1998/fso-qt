@@ -64,7 +64,7 @@ int flatcnt=0;
 QFile obslog;
 QString obslogfile,obslogdir,obslogdate,logtmp,obsname;
 std::ofstream outfile;
-QMutex mutex,histlock;
+QMutex mutex,histlock,histdisplock;
 quint16 imgMax=0,freedisk;
 double sx=200,sy=200,ex=800,ey=800;
 bool drawing=false;
@@ -80,8 +80,8 @@ QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
 //QVector<unsigned short>vecimg(3000*3000,0);
-QVector<unsigned short>vechistdata(65536,0);
-int histmax=0,histidx=32768;
+//QVector<unsigned short>vechistdata(65536,0);
+//int histmax=0,histidx=32768;
 bool histfirst=true;
 //QChart *chart;
 
@@ -266,9 +266,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
     //绘制直方图
+    QVector<unsigned short>vechistdata0(65536,0);
+    int histmax0=0;
+    int histidx0=32768;
     lineseries=new QLineSeries();
     for (int i=0;i<65536;++i) {
-       lineseries->append(QPointF(i,vechistdata[i]));
+       lineseries->append(QPointF(i,vechistdata0[i]));
        //set->setColor(QColor::Rgb);
     }
     lineseries->setUseOpenGL(true);
@@ -288,15 +291,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     axisX->setMax(65535);
     axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->append(QString::number(0),0);
-    QString tmpstring = QString::number(histidx);
-    axisX->append("<font color=\"red\">"+tmpstring+"</font>", histidx);
+    QString tmpstring = QString::number(histidx0);
+    axisX->append("<font color=\"red\">"+tmpstring+"</font>", histidx0);
     axisX->append(QString::number(65535),65535);
 
     //设置纵坐标
     axisY = new QValueAxis();
     axisY->setTickCount(3);
     axisY->setLabelFormat("%d");
-    axisY->setRange(0,histmax);
+    axisY->setRange(0,histmax0);
 
     //建表
     chart = new QChart();
@@ -911,9 +914,9 @@ void MainWindow::on_btnSnap_pressed() {
 
 
 
-void MainWindow::drawHist()
+void MainWindow::drawHist(QVector<unsigned short>vechistdata,int histmax,int histidx)
 {
-    histlock.lock();
+    histdisplock.lock();
     qDebug("here inside drawHist...");
 
     imgready=false;
@@ -960,34 +963,21 @@ void MainWindow::drawHist()
     chart->addAxis(axisY,Qt::AlignLeft);
 
     ui->chart_graphicsView->setVisible(true);
-    ui->chart_graphicsView->update();
-    imgready=false; 
-    histlock.unlock();
+    ui->chart_graphicsView->update(); 
+    histdisplock.unlock();
     imgready=true;
 
 
 }
 
-void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
+void MainWindow::updateGraphicsView(unsigned short* buf) {
     QMutex histlock;
     histlock.lock();
+    display=true;
     if(live && NULL != buf )
     {
-        //histlock.lock();
         QImage *qimage;
-        //currentImage.release();
         currentImage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, buf);
-        //imgMax=*std::max_element(buf,buf+buflen);
-        //if(imgMax<=0)
-            //return;
-        //if(currentImage.data)
-        //{
-        //grayimage= new QImage(static_cast<unsigned char *>(currentImage.data), currentImage.cols, currentImage.rows, static_cast<int>(currentImage.step), QImage::Format_Grayscale16);
-        //if(currentImage.data)
-            //emit histReady(*grayimage);
-
-        //}
-
         double minVal;
         double maxVal;
         cv::Point minLoc;
@@ -1006,18 +996,6 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
             histlock.unlock();
             return;
         }
-        //QImage *tmpimg = new QImage(static_cast<unsigned char *>(lossyImage.data), lossyImage.cols, currentImage.rows, static_cast<int>(lossyImage.step), QImage::Format_Indexed8);
-        //QImage tmpimg_copy;
-        //tmpimg_copy=tmpimg->copy(QRect());
-        //cv::Mat histdata;
-        //histdata=lossyImage.clone();
-        //emit histReady(histdata);
-        //currentImage.convertTo(lossyImage, CV_8U, 1.0 / 255, 0);
-        //if(!lossyImage.data)
-        //{
-            //display=false;
-            //return;
-        //}
         if(drawing && live)
             rectangle(lossyImage, cv::Point(static_cast<int>(sx), static_cast<int>(sy)), cv::Point(static_cast<int>(ex),static_cast<int>(ey)), RGB(0,0,0), 4,8,0);
         //rectangle(lossyImage, cv::Point(static_cast<int>(sx), static_cast<int>(sy)), cv::Point(static_cast<int>(ex),static_cast<int>(ey)), cv::Scalar(255, 0, 255), 4, 8, 0);
@@ -1037,16 +1015,8 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
         //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
         ui->graphicsView->update();
         currentImage.release();
-        //lossyImage.release();
-        //histdata.release();
-        /*QImage qimage_copy;
-        qimage_copy=qimage->copy(QRect());
-        if(imgready)
-            emit histReady(qimage_copy);*/
-        //drawHist(qimage_copy);
 
         delete qimage;
-        //delete grayimage;
 
         if(savefits)
         {

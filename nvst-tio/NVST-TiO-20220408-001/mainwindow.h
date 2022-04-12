@@ -74,7 +74,7 @@ extern int flatcnt;
 extern QFile obslog;
 extern QString obslogfile,obslogdir,obslogdate,obsname;
 extern std::ofstream outfile;
-extern QMutex mutex,histlock;
+extern QMutex mutex,histlock,histdisplock;
 extern quint16 imgMax,freedisk;
 extern double sx,sy,ex,ey;
 extern bool drawing,continousACQ,fulldisk;
@@ -88,9 +88,9 @@ extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern int histmax,histidx;
+//extern int histmax,histidx;
 //extern QVector<unsigned short>vecimg;
-extern QVector<unsigned short>vechistdata;
+//extern QVector<unsigned short>vechistdata;
 extern bool histfirst;
 //extern QChart *chart;
 
@@ -123,7 +123,7 @@ private slots:
 
     void on_btnLive_pressed();
 
-    void updateGraphicsView(unsigned short* buf,uint buflen);
+    void updateGraphicsView(unsigned short* buf);
 
     void displayOK();
 
@@ -164,7 +164,7 @@ private slots:
 
     //void drawHist(unsigned short *,int);
     //void drawHist();
-    void drawHist();
+    void drawHist(QVector<unsigned short>,int,int);
     //void drawHist(cv::Mat);
 
 signals:
