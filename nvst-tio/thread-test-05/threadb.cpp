@@ -65,6 +65,9 @@ void threadB::calcHist(QVector<unsigned short>myvecimg)
 
         if(!histlocked)
             emit histReady(vechistdata,histmax,histindex);
+        QVector<unsigned short> nullvec;
+        vechistdata.swap(nullvec);
+        myvecimg.swap(nullvec);
     }
 }
 //void threadB::finished()

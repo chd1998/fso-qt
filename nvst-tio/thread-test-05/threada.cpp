@@ -22,6 +22,7 @@ void threadA::working()
 
         lockA.lock();
         vecimg.clear();
+        //vecimg.resize(imgX*imgY,0);
        //generate random data
         syncAB=false;
         for(int i = 0 ;i < imgY*imgX ;i++)
@@ -40,6 +41,8 @@ void threadA::working()
         {
             emit imgReady(vecimg);
         }
+        QVector<unsigned short> nullvec;
+        vecimg.swap(nullvec);
         countA++;
         lockA.unlock();
         //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);

@@ -224,6 +224,8 @@ void MainWindow::on_btn_stopA_pressed()
         }
         thread1->deleteLater();
         delete[] myImageBack;
+
+        //delete grayimage16;
         startedA=false;
     }
 
@@ -378,11 +380,12 @@ void MainWindow::updateImg()
 {
     imglock.lock();
     imglocked = true;
-    if(grayimage16 != NULL)
-    {
-        delete grayimage16;
-    }
+    //if(grayimage16)
+    //{
+        //delete grayimage16;
+    //}
     grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+
     if((!pausedA || !stoppedA) && startedA && nullptr != myImage )
     {
         //*grayimage16 = QImage((unsigned char *)myImage,imgX,imgY,QImage::Format_Grayscale16);
@@ -401,7 +404,7 @@ void MainWindow::updateImg()
         ui->imgView->update();
         //delete item;
     }
-
+    delete grayimage16;
     imglock.unlock();
     imglocked = false;
 }
