@@ -42,6 +42,9 @@ void histdisplay::buf2img(unsigned short* imgbuf)
     localvechistdata.swap(nullvec);
     localvecimg.swap(nullvec);
     histlock.unlock();
+    QVector<unsigned short> nullvec;
+    localvechistdata.swap(nullvec);
+    localvecimg.swap(nullvec);
 }
 
 

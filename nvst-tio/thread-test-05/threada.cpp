@@ -45,6 +45,9 @@ void threadA::working()
         vecimg.swap(nullvec);
         countA++;
         lockA.unlock();
+        QVector<unsigned short> nullvec;
+        //vechistdata.swap(nullvec);
+        vecimg.swap(nullvec);
         //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);
         QElapsedTimer t;
         t.start();

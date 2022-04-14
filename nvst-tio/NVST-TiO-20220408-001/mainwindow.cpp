@@ -966,6 +966,8 @@ void MainWindow::drawHist(QVector<unsigned short>vechistdata,int histmax,int his
     ui->chart_graphicsView->update(); 
     histdisplock.unlock();
     imgready=true;
+    QVector<unsigned short> nullvec;
+    vechistdata.swap(nullvec);
 
 
 }
