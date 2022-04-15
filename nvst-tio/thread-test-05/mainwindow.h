@@ -59,7 +59,7 @@ private:
 
 private slots:
     void updateStatus(QString,int);
-    void updateImg();
+    void updateImg(QVector<unsigned short>);
     void updateHist(QVector<unsigned short>,int,int);
     void pauseThread(QString);
     void on_btn_start_A_clicked();

@@ -141,8 +141,8 @@ void MainWindow::on_btn_start_A_clicked()
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
     vecimg.resize(imgX*imgY,0);
-    myImage= new unsigned short[imgX*imgY];
-    myImageBack=myImage;
+    //myImage= new unsigned short[imgX*imgY];
+    //myImageBack=myImage;
     low=ui->lineEdit_low->text().toInt();
     high=ui->lineEdit_high->text().toInt();
     if( low >= high )
@@ -223,7 +223,7 @@ void MainWindow::on_btn_stopA_pressed()
             qDebug()<<"Waiting...";
         }
         thread1->deleteLater();
-        delete[] myImageBack;
+        //delete[] myImageBack;
 
         //delete grayimage16;
         startedA=false;
@@ -376,7 +376,7 @@ void MainWindow::closeP()
     }
 }
 
-void MainWindow::updateImg()
+void MainWindow::updateImg(QVector<unsigned short> currentVecImage)
 {
     imglock.lock();
     imglocked = true;
@@ -385,6 +385,11 @@ void MainWindow::updateImg()
         //delete grayimage16;
     //}
     grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+    unsigned short *myImage= new unsigned short[imgX*imgY];
+    for(int i = 0 ;i < imgY*imgX ;i++)
+    {
+        myImage[i]=currentVecImage.at(i);
+    }
 
     if((!pausedA || !stoppedA) && startedA && nullptr != myImage )
     {
@@ -405,6 +410,7 @@ void MainWindow::updateImg()
         //delete item;
     }
     delete grayimage16;
+    delete[] myImage;
     imglock.unlock();
     imglocked = false;
 }

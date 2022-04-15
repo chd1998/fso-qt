@@ -11,7 +11,7 @@ threadA::threadA()
 
 void threadA::working()
 {
-    qDebug()<<"1: "<<imgX<<" "<<imgY<<" "<<vecimg.size();
+    //qDebug()<<"1: "<<imgX<<" "<<imgY<<" "<<vecimg.size();
     //grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
     //grayimage = new QImage(imgX,imgY,QImage::Format_Indexed8);
 
@@ -30,7 +30,7 @@ void threadA::working()
 
                 //myImage[j+i*row]=(unsigned short)QRandomGenerator::global()->bounded(0,65535);
                 int randnum=QRandomGenerator::global()->bounded(low,high);
-                myImage[i]=randnum;
+                //myImage[i]=randnum;
                 vecimg.append(randnum);
 
         }
@@ -45,9 +45,6 @@ void threadA::working()
         vecimg.swap(nullvec);
         countA++;
         lockA.unlock();
-        QVector<unsigned short> nullvec;
-        //vechistdata.swap(nullvec);
-        vecimg.swap(nullvec);
         //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);
         QElapsedTimer t;
         t.start();
