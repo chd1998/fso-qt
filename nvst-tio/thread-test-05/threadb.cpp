@@ -14,7 +14,8 @@ void threadB::working()
     //while(!stoppedB)
     {
         lockB.lock();
-        if(!stoppedB || !pausedB)
+        Blocked=true;
+        if(!stoppedB || !pausedB || !histlocked)
             emit fromB(src,countB);
 
         //calcHist();
@@ -23,9 +24,10 @@ void threadB::working()
         countB++;
 
         lockB.unlock();
+        Blocked=false;
         QElapsedTimer t;
         t.start();
-        while(t.elapsed()<histRate)
+        while(t.elapsed()<histRate || Alocked)
             QCoreApplication::processEvents();
 
 
@@ -38,7 +40,7 @@ void threadB::working()
 }
 void threadB::calcHist(QVector<unsigned short>myvecimg)
 {
-    if(syncAB)
+    if(!histlocked)
     {
         QVector<unsigned short>vechistdata(65536,0);
 
@@ -59,16 +61,17 @@ void threadB::calcHist(QVector<unsigned short>myvecimg)
                 //std::cout<<idx<<"@"<<vechistdata[idx]<<std::endl;
            }
         }
-        qDebug()<<"idx= "<<histindex<<" max= "<<histmax<<" vecimg size= "<<myvecimg.size();
+        qDebug()<<"Count "<<countB<<":"<<"idx= "<<histindex<<" max= "<<histmax<<" vecimg size= "<<myvecimg.size();
         //std::sort(std::execution::par_unseq, vechistdata.begin(), vechistdata.end());
         //qDebug()<<"idx="<<histindex<<" Value="<<vechistdata.at(histindex);
 
-        if(!histlocked)
+        if( !Alocked)
             emit histReady(vechistdata,histmax,histindex);
         QVector<unsigned short> nullvec;
         vechistdata.swap(nullvec);
         myvecimg.swap(nullvec);
     }
+
 }
 //void threadB::finished()
 //{

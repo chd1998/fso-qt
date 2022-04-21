@@ -11,7 +11,7 @@
 #include <QGraphicsScene>
 
 extern  QMutex lockA,lockB,imglock,histlock;
-extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,syncAB;
+extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,Alocked,Blocked;
 extern  int imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
 extern  QImage *grayimage,*grayimage16;
 //extern  int *histdata;

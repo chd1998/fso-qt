@@ -21,10 +21,11 @@ void threadA::working()
     {
 
         lockA.lock();
+        Alocked=true;
         vecimg.clear();
         //vecimg.resize(imgX*imgY,0);
        //generate random data
-        syncAB=false;
+        //syncAB=false;
         for(int i = 0 ;i < imgY*imgX ;i++)
         {
 
@@ -34,7 +35,7 @@ void threadA::working()
                 vecimg.append(randnum);
 
         }
-        syncAB=true;
+        //syncAB=true;
         if(!stoppedA || !pausedA)
             emit fromA(src,countA);
         if(!imglocked || !histlocked)
@@ -45,10 +46,11 @@ void threadA::working()
         vecimg.swap(nullvec);
         countA++;
         lockA.unlock();
+        Alocked=false;
         //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);
         QElapsedTimer t;
         t.start();
-        while(t.elapsed()<frameRate)
+        while(t.elapsed()<frameRate || Blocked)
             QCoreApplication::processEvents();
         //delete grayimage16;
         //delete grayimage;

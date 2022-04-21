@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,syncAB=false;
+bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,Alocked=false,Blocked=false;
 QMutex lockA,lockB,imglock,histlock;
 QImage *grayimage,*grayimage16;
 int imgX0=1024,imgY0=1024,imgX,imgY,frameRate=100,histRate=200,low=20000,high=42000;
@@ -22,7 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     //std::vector<int>imgdata(65536,0);
     ui->setupUi(this);
-
+    QString proFullPath=QCoreApplication::applicationFilePath();
+    QFileInfo tmpinfo(proFullPath);
+    QString proName=tmpinfo.fileName();
+    QStringList tmplist=proName.split(".");
+    setWindowTitle(tmplist[0]+" - by Chen Dong @fso");
     ui->textEdit_StatusA->append("Waiting for ThreadA....");
     ui->textEdit_StatusB->append("Waiting for ThreadB....");
 
