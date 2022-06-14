@@ -73,11 +73,11 @@ void histdisplay::buf2hist(QVector<unsigned short>localvecimg)
     histlock.unlock();
     //display delayed for 50ms
     QElapsedTimer t1;
-    t1.start();
-    while(t1.elapsed()<20)
-    {
-        QCoreApplication::processEvents();
-    }
+    //t1.start();
+    //while(t1.elapsed()<20)
+    //{
+    //    QCoreApplication::processEvents();
+    //}
     histcalc_locked=false;
 }
 

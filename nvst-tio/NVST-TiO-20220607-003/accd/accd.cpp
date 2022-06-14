@@ -259,16 +259,15 @@ void aCCD::getData()
             if(live && !display_locked && display)
                 emit buf_Ready(unpackedBufferback);
             //if(!histcalc_locked)
-            if(!histcalc_locked && !histshow_locked && live)
+            //if(!histcalc_locked && !histshow_locked && live && display)
+            if(!histcalc_locked && live)
             {
                 QVector<unsigned short>vecimg(unpackedBufferback,unpackedBufferback+imgW*imgH);
                 emit calcHist(vecimg);
                 QVector<unsigned short> nullvec;
                 vecimg.swap(nullvec);
+                histfirst=false;
             }
-
-        //}
-            histfirst=false;
          }
          //qDebug()<<"Saving : "<<QString::number(fserialNo);
          //saveStatus=0;

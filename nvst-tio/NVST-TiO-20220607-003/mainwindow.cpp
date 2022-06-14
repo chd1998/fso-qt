@@ -151,15 +151,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             // move the task object to the thread BEFORE connecting any signal/slots
             task->moveToThread(histthread);
             connect(histthread, &QThread::started, task, &histdisplay::working);
-            connect(task, &histdisplay::finished, histthread, &QThread::quit,Qt::DirectConnection);
+            connect(task, &histdisplay::finished, histthread, &QThread::quit);
             connect(task, &histdisplay::finished, task, &histdisplay::deleteLater);
             //connect(task, &histdisplay::finished, this,  &MainWindow::slotFinished);
             connect(histthread, &QThread::finished, histthread, &QThread::deleteLater);
 
             connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView);
-            connect(andorCCD,&aCCD::calcHist,task,&histdisplay::buf2hist);
-            connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ);
-            connect(task,&histdisplay::draw_hist,this,&MainWindow::drawHist);
+            connect(andorCCD,&aCCD::calcHist,task,&histdisplay::buf2hist,Qt::DirectConnection);
+            connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ,Qt::DirectConnection);
+            connect(task,&histdisplay::draw_hist,this,&MainWindow::drawHist,Qt::BlockingQueuedConnection);
             //*histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
 
             histthread->start();
@@ -302,14 +302,14 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //设置纵坐标
     axisY = new QValueAxis();
     axisY->setTickCount(3);
-    axisY->setLabelFormat("%d");
+    axisY->setLabelFormat("%7d");
     axisY->setRange(0,histmax0);
 
     //建表
     chart = new QChart();
     chart->setContentsMargins(0,0,0,0);
     //左上右下
-    chart->setMargins(QMargins(40,0,20,0));
+    chart->setMargins(QMargins(20,0,20,0));
     chart->setAutoFillBackground(true);
     chart->addSeries(series);
     //chart->createDefaultAxes();
@@ -656,11 +656,6 @@ void MainWindow::on_btnLive_pressed() {
 
 }
 
-void MainWindow::displayOK(){
-    if(!display)
-        display=true;
-}
-
 void MainWindow::stopACQ(){
     ui->textEdit_status->append("Waiting for Saving Data...");
     QElapsedTimer t1;
@@ -686,10 +681,6 @@ void MainWindow::stopACQ(){
         {
             break;
         }
-        //if((fpre=="FLAT" && (fserialNo % datanum)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % datanum)==0 && fserialNo>0))
-        //    break;
-        //if(fpre=="FLAT" && fserialNo > 2000)
-            //break;
     }
     savefits=false;
     if(fpre=="T")
@@ -926,69 +917,74 @@ void MainWindow::on_btnSnap_pressed() {
     }
 }
 
-void MainWindow::drawHist(QVector<unsigned short>vechistdata,uint histmax,uint histidx)
+void MainWindow::drawHist(QVector<uint>vechistdata,uint histmax,uint histidx)
 {
 
-    histdisplock.lock();
-    histshow_locked=true;
-    qDebug("here inside drawHist...");
-    //ui->textEdit_status->append("hist show");
-    chart->removeSeries(series);
-    delete lineseries;
-    delete series;
-    lineseries=new QLineSeries();
-    //series->clear();
-    for (int i=0;i<65536;++i) {
-       lineseries->append(QPointF(i,vechistdata[i]));
-    }
-    lineseries->setColor(Qt::black);
-
-    series = new QAreaSeries(lineseries);
-    series->setName("Histogram");
-    QPen pen(Qt::black);
-    pen.setWidth(1);
-    series->setPen(pen);
-    QBrush brush;
-    brush.setColor(Qt::black);//画刷颜色
-    brush.setStyle(Qt::SolidPattern);//画刷填充样式
-    series->setBrush(brush);
-
-    chart->removeAxis(axisX);
-    delete axisX;
-    axisX = new QCategoryAxis();
-    axisX->setMin(0);
-    axisX->setMax(65535);
-    axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-    axisX->append(QString::number(0),0);
-    QString tmpstring = QString::number(histidx);
-    axisX->append("<font color=\"red\">"+tmpstring+"</font>", histidx);
-    axisX->append(QString::number(65535),65535);
-
-    chart->removeAxis(axisY);
-    delete axisY;
-    axisY = new QValueAxis();
-    axisY->setTickCount(3);
-    axisY->setLabelFormat("%8.1f");
-    axisY->setMax(histmax);
-    axisY->setMin(0);
-    axisY->setRange(0,histmax);
-
-    chart->addSeries(series);
-    chart->addAxis(axisX,Qt::AlignBottom);
-    chart->addAxis(axisY,Qt::AlignLeft);
-
-    ui->chart_graphicsView->setVisible(true);
-    ui->chart_graphicsView->update();
-
-    histdisplock.unlock();
-
-    QElapsedTimer t1;
-    t1.start();
-    while(t1.elapsed()<50)
+    if(live)
     {
-        QCoreApplication::processEvents();
+        histdisplock.lock();
+        histshow_locked=true;
+        //qDebug("here inside drawHist...");
+        //ui->textEdit_status->append("inside hist show");
+        chart->removeSeries(series);
+        delete lineseries;
+        delete series;
+        lineseries=new QLineSeries();
+        //series->clear();
+        for (int i=0;i<vechistdata.size();++i) {
+           lineseries->append(QPointF(i,vechistdata[i]));
+        }
+        lineseries->setColor(Qt::black);
+
+        series = new QAreaSeries(lineseries);
+        series->setName("Histogram");
+        QPen pen(Qt::black);
+        pen.setWidth(1);
+        series->setPen(pen);
+        QBrush brush;
+        brush.setColor(Qt::black);//画刷颜色
+        brush.setStyle(Qt::SolidPattern);//画刷填充样式
+        series->setBrush(brush);
+
+        chart->removeAxis(axisX);
+        delete axisX;
+        axisX = new QCategoryAxis();
+        axisX->setMin(0);
+        axisX->setMax(65535);
+        axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+        axisX->append(QString::number(0),0);
+        QString tmpstring = QString::number(histidx);
+        axisX->append("<font color=\"red\">"+tmpstring+"</font>", histidx);
+        axisX->append(QString::number(65535),65535);
+
+        chart->removeAxis(axisY);
+        delete axisY;
+        axisY = new QValueAxis();
+        axisY->setTickCount(3);
+        axisY->setLabelFormat("%7d");
+        axisY->setRange(0,histmax);
+
+        chart->addSeries(series);
+        chart->addAxis(axisX,Qt::AlignBottom);
+        chart->addAxis(axisY,Qt::AlignLeft);
+
+        ui->chart_graphicsView->setVisible(true);
+        ui->chart_graphicsView->update();
+
+        histdisplock.unlock();
+
+        /*QElapsedTimer t1;
+        t1.start();
+        while(t1.elapsed()<50)
+        {
+            QCoreApplication::processEvents();
+        }*/
+        histshow_locked=false;
     }
-    histshow_locked=false;
+}
+
+void MainWindow::displayOK(){
+        display=true;
 }
 
 void MainWindow::updateGraphicsView(unsigned short* buf) {
@@ -1036,7 +1032,6 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
         //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
         ui->graphicsView->update();
         currentImage.release();
-
         delete qimage;
 
         if(savefits)
@@ -1065,9 +1060,11 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
         //histlock.unlock();
 
     }
-   display=false;
+
    displock.unlock();
    display_locked=false;
+   display=false;
+
 }
 
 void MainWindow::on_actionServer_triggered() {
