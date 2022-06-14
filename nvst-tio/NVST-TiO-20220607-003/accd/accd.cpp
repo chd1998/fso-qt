@@ -111,28 +111,11 @@ void aCCD::run()
     {
         if(live)
         {
-            if(savefits && localfirst && fpre=="T")
-            {
-                t1=QDateTime::currentDateTime();
-                lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
-                localfirst=false;
-            }
+
 
             getData();
 
-            if(savefits)
-            {
-                t2=QDateTime::currentDateTime();
-                lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
-            }
-            dt=lt2-lt1;
-            if(fpre=="T" && dt>=groupdelay && (serialNo % 200)==0)
-            {
-                localsave=true;
-                lt1=lt2;
-            }
-            else
-                localsave=false;
+
         }
         //if(QThread::currentThread()->isInterruptionRequested())
             //break;
@@ -238,6 +221,13 @@ void aCCD::getData()
 
     AT_Command(handle, L"AcquisitionStart");
     int saveStatus;
+    if(savefits && localfirst && fpre=="T")
+    {
+        t1=QDateTime::currentDateTime();
+        lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
+        localfirst=false;
+    }
+
     for (int i=0; i < NumberOfFrames; i++) {
          AT_WaitBuffer(handle, &buffer, &BufSize, AT_INFINITE);
          //Application specific data processing goes here..
@@ -252,30 +242,14 @@ void aCCD::getData()
          //AT_ConvertBuffer(buffer, reinterpret_cast<unsigned char *>(unpackedBuffer01), imgW, imgH, imgStride, pixelEncoding, L"Mono16");
          //AT_FinaliseUtilityLibrary();
 
-         if(NULL != unpackedBufferback)
-         {
-            //imgMax=*std::max_element(unpackedBufferback,unpackedBufferback+len);
-            //uint len=sizeof(*unpackedBufferback)/sizeof(unpackedBufferback);
-            if(live && !display_locked && display)
-                emit buf_Ready(unpackedBufferback);
-            //if(!histcalc_locked)
-            //if(!histcalc_locked && !histshow_locked && live && display)
-            if(!histcalc_locked && live)
-            {
-                QVector<unsigned short>vecimg(unpackedBufferback,unpackedBufferback+imgW*imgH);
-                emit calcHist(vecimg);
-                QVector<unsigned short> nullvec;
-                vecimg.swap(nullvec);
-                histfirst=false;
-            }
-         }
+
          //qDebug()<<"Saving : "<<QString::number(fserialNo);
          //saveStatus=0;
          if(savefits && i >= 1 && !fulldisk ){
            if(fpre=="T" && localsave)
-            saveStatus=saveData(saveDir,unpackedBufferback);
+                saveStatus=saveData(saveDir,unpackedBufferback);
            else
-            saveStatus=saveData(saveDir,unpackedBufferback);
+                saveStatus=saveData(saveDir,unpackedBufferback);
            if(saveStatus==0)
            {
                serialNo=(serialNo+1) % frameRate;
@@ -296,9 +270,39 @@ void aCCD::getData()
                }
            }//end of savestatus
          }//end of savefits
+
+         if(NULL != unpackedBufferback)
+         {
+            if(live && !display_locked && display)
+                emit buf_Ready(unpackedBufferback);
+            if(!histcalc_locked && live)
+            {
+                QVector<unsigned short>vecimg(unpackedBufferback,unpackedBufferback+imgW*imgH);
+                emit calcHist(vecimg);
+                QVector<unsigned short> nullvec;
+                vecimg.swap(nullvec);
+                histfirst=false;
+            }
+         }
          //Re-queue the buffers
          AT_QueueBuffer(handle, AlignedBuffers[i%NumberOfBuffers], bufferSize);
+         if(savefits && fpre=="T" )
+         {
+             t2=QDateTime::currentDateTime();
+             lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
+             dt=lt2-lt1;
+
+             if(dt>=groupdelay)
+             {
+                 localsave=true;
+                 lt1=lt2;
+                 break;
+             }
+             else
+                 localsave=false;
+         }
         }//end of num. of frames
+
     //Stop the acquisition
     AT_Command(handle, L"AcquisitionStop");
     AT_Flush(handle);
