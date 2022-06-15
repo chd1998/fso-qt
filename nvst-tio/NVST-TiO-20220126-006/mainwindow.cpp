@@ -481,7 +481,7 @@ void MainWindow::on_btnLive_pressed() {
             frameRate=frameRateMax;
         ui->lineEdit_framerate->setText(QString::number(frameRate));
         groupdelay=ui->lineEdit_groupdelay->text().toInt();
-        if(groupdelay<10 || groupdelay>60)
+        if(groupdelay<20 || groupdelay>60)
             groupdelay=30;
         ui->lineEdit_groupdelay->setText(QString::number(groupdelay));
         labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");

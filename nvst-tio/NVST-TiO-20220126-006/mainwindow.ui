@@ -621,7 +621,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Secs./Group(&gt;=10, &lt;=60)</string>
+      <string>Secs./Group(20~60 Secs.)</string>
      </property>
     </widget>
    </widget>
