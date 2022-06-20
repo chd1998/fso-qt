@@ -38,12 +38,12 @@
 
 double expTime=1.2;
 int frameRate=200;
-int framedelay=50,groupdelay=30;
+uint framedelay=50,groupdelay=30,fps0=0,fps1=0,fps=0;
 int frameRateMax=200;
 QString saveTo="e:\\",savepre="",savepred="",savepref="",ccdM,saveDir="",savepreobj,savepredf,save01="";
 //QString current_date_d;
 //QString current_date_t;
-bool savefits=false,opened=false,live=false,display=false,display_locked=false,imgready=true,histshow_locked=false,histcalc_locked=false;
+bool savefits=false,opened=false,live=false,display=false,display_locked=false,imgready=true,histshow_locked=false,histcalc_locked=false,savefits_locked=false,wait_Acq=false;
 double temperature=0.0;
 aCCD *andorCCD;
 AT_64 imgW,imgH,imgStride,imageSizeBytes;
@@ -156,10 +156,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             //connect(task, &histdisplay::finished, this,  &MainWindow::slotFinished);
             connect(histthread, &QThread::finished, histthread, &QThread::deleteLater);
 
-            connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView,Qt::BlockingQueuedConnection);
+            connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView);
             connect(andorCCD,&aCCD::calcHist,task,&histdisplay::buf2hist,Qt::DirectConnection);
             connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ,Qt::DirectConnection);
             connect(task,&histdisplay::draw_hist,this,&MainWindow::drawHist,Qt::BlockingQueuedConnection);
+            //connect(andorCCD, &aCCD::pause_Acq, this, &MainWindow::periodicSave,Qt::DirectConnection);
             //*histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
 
             histthread->start();
@@ -427,6 +428,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::showTime()
 {
     QString diskname;
+
+    fps=fps1-fps0;
+    fps0=fps1;
     QDateTime current_date_time =QDateTime::currentDateTime();
     if(opened)
     {
@@ -435,7 +439,7 @@ void MainWindow::showTime()
     long t1 = current_date_time.toSecsSinceEpoch();
     float dt = (float)(t1-t0)/3600.0;
     QString angle_sign=u8"°C";
-    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || Up Time: "+QString::number(dt,'f',4)+"hrs || Sensor: "+QString::number(temperature)+angle_sign;
+    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || Up: "+QString::number(dt,'f',4)+"hrs || Sensor: "+QString::number(temperature)+angle_sign+" || FPS: "+QString::number(fps)+" Frames/Sec.";
     ui->label_time->setText(current_date);
     diskname=ui->lineEdit_saveto->text();
     quint64 freeDiskSpace = getDiskSpace(diskname, false);
@@ -577,6 +581,11 @@ void MainWindow::on_btnLive_pressed() {
         liveTimer = new QTimer(parent());
         connect(liveTimer, &QTimer::timeout, this, &MainWindow::displayOK);
         liveTimer->start(framedelay);
+
+        //saveTimer = new QTimer(parent());
+        //connect(saveTimer, &QTimer::timeout, this, &MainWindow::periodicSave);
+        //saveTimer->start(groupdelay*1000);
+
         expTime=ui->lineEdit_exposuretime->text().toFloat();
         if(expTime<=0)
             expTime=1.2;
@@ -738,10 +747,14 @@ void MainWindow::on_btnSnap_pressed() {
     if(!savefits  && live && opened && !fulldisk )
     {
         localfirst=true;
+        //localsave=true;
+        savefits=true;
+
+
         QDateTime current_date_time =QDateTime::currentDateTimeUtc();
         current_date_d =current_date_time.toString("yyyyMMdd");
         current_date_t1 =current_date_time.toString("hhmmss");
-        savefits=true;
+
         saveTo=ui->lineEdit_saveto->text();
         //dir example
         //e:\20211008\TIO\dark\062905\062905
@@ -854,6 +867,7 @@ void MainWindow::on_btnSnap_pressed() {
     {
         ui->btnSnap->setText("Start Acquisition");
         localfirst=true;
+
         ui->textEdit_status->append("Waiting for Saving Data...");
         //QElapsedTimer t1;
         //t1.start();
@@ -871,6 +885,7 @@ void MainWindow::on_btnSnap_pressed() {
         }
         ui->textEdit_status->append("Saving Data Finished...");
         savefits=false;
+        localsave=false;
         ui->btnSnap->setEnabled(true);
         if(fpre=="T")
             datatype="TiO";
@@ -914,6 +929,11 @@ void MainWindow::on_btnSnap_pressed() {
         ui->lineEdit_objname->setEnabled(true);
         ui->lineEdit_cor1->setEnabled(true);
         ui->lineEdit_cor2->setEnabled(true);
+        //saveTimer->stop();
+        //disconnect(saveTimer, &QTimer::timeout, this, &MainWindow::periodicSave);
+        //saveTimer->deleteLater();
+
+        //delete saveTimer;
     }
 }
 
@@ -987,6 +1007,18 @@ void MainWindow::displayOK(){
         display=true;
 }
 
+/*void MainWindow::periodicSave(uint dt)
+{
+    uint wait_time_ms=(groupdelay-dt)*1000;
+    QElapsedTimer t;
+    t.start();
+    while(!t.hasExpired(wait_time_ms))
+    {
+        QCoreApplication::processEvents();
+    }
+    wait_Acq=false;
+}*/
+
 void MainWindow::updateGraphicsView(unsigned short* buf) {
     QMutex displock;
     displock.lock();
@@ -1058,6 +1090,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
         }
         //display=false;
         //histlock.unlock();
+        fps1=fps1+1;
 
     }
 
@@ -1192,28 +1225,22 @@ void MainWindow::on_actionDetect_Cameras_triggered() {
 
 void MainWindow::on_checkBox_Data_clicked()
 {
-
     ui->lineEdit_objname->setEnabled(true);
     ui->lineEdit_cor1->setEnabled(true);
     ui->lineEdit_cor2->setEnabled(true);
     ui->lineEdit_datanum->setEnabled(true);
     ui->lineEdit_darknum->setEnabled(false);
     ui->lineEdit_flatnum->setEnabled(false);
-    //ui->lineEdit_objname->setEnabled(false);
-    //ui->lineEdit_cor1->setEnabled(false);
-    //ui->lineEdit_cor2->setEnabled(false);
 }
 
 void MainWindow::on_checkBox_Dark_clicked()
 {
-
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
     ui->lineEdit_datanum->setEnabled(false);
     ui->lineEdit_darknum->setEnabled(true);
     ui->lineEdit_flatnum->setEnabled(false);
-
 }
 
 void MainWindow::on_checkBox_Flat_clicked()

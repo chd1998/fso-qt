@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QImage>
 #include <QDir>
+#include <QTimer>
 class aCCD:public QThread
 {
     Q_OBJECT
@@ -20,6 +21,7 @@ public:
     void run();
     int init_aCCD();
     void getData();
+
     int saveData(QString,unsigned short*);
     //void buf2image(unsigned short*);
 
@@ -39,8 +41,9 @@ public:
     QByteArray tmpchar;
     char *fkword;
     QDateTime t1,t2;
-    int lt1,lt2,dt;
+    uint lt1,lt2,dt;
     bool localsave;
+    //QTimer *saveTimer = nullptr;
     //QDir sdir;
     //=current_date_time.toString("hhmmss");
 
@@ -50,6 +53,8 @@ signals:
     void calcHist(unsigned short*,uint);
     //void calcHist(QVector<unsigned short>);
     void stop_Acq();
+    //void pause_Acq(uint);
+
 };
 
 #endif // ACCD_H

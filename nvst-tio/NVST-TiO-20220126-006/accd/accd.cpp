@@ -201,11 +201,11 @@ void aCCD::getData()
 
     AT_Command(handle, L"AcquisitionStart");
     int saveStatus;
-    if(savefits && localfirst && fpre=="T")
+    if(localsave)
     {
         t1=QDateTime::currentDateTime();
         lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
-        localfirst=false;
+        //localfirst=false;
     }
     for (int i=0; i < NumberOfFrames; i++) {
          AT_WaitBuffer(handle, &buffer, &BufSize, AT_INFINITE);
@@ -251,22 +251,36 @@ void aCCD::getData()
          }//end of savefits
          //Re-queue the buffers
          AT_QueueBuffer(handle, AlignedBuffers[i%NumberOfBuffers], bufferSize);
-         if(savefits && fpre=="T" )
+         if(!localsave)
          {
              t2=QDateTime::currentDateTime();
              lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
              dt=lt2-lt1;
-
              if(dt>=groupdelay)
              {
                  localsave=true;
-                 lt1=lt2;
                  break;
              }
-             else
-                 localsave=false;
+
          }
         }//end of num. of frames
+    if(localsave)
+    {
+        t2=QDateTime::currentDateTime();
+        lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
+        dt=lt2-lt1;
+        if(dt>=groupdelay)
+        {
+            localsave=true;
+        }
+        else
+        {
+            localsave=false;
+            //wait_Acq=true;
+            //lt1=lt2;
+            //emit pause_Acq(dt);
+        }
+    }
     //Stop the acquisition
     AT_Command(handle, L"AcquisitionStop");
     AT_Flush(handle);

@@ -12,7 +12,7 @@ QT       += charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 
-TARGET = NVST-TiO-20220607-006
+TARGET = NVST-TiO-20220607-009
 TEMPLATE = app
 
 #QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O1

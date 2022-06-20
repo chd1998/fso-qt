@@ -49,11 +49,12 @@ class MainWindow;
 
 extern double expTime;
 extern int frameRate;
-extern int framedelay,groupdelay;
+extern uint framedelay,groupdelay;
 extern int frameRateMax;
 extern int realDev;
 extern QString saveTo,savepred,savepref,savepre,ccdM,saveDir,savepreobj,savepredf,save01;
-extern bool savefits,opened,live,display,display_locked,imgready,histshow_locked,histcalc_locked;;
+extern bool savefits,opened,live,display,display_locked,imgready,histshow_locked,histcalc_locked,savefits_locked,wait_Acq;
+extern uint fps0,fps1,fps;
 extern double temperature;
 extern AT_64 imgW,imgH,imgStride,imageSizeBytes;
 extern AT_H handle;
@@ -127,6 +128,8 @@ private slots:
 
     void displayOK();
 
+    //void periodicSave(uint);
+
     void stopACQ();
 
     void on_actionServer_triggered();
@@ -190,6 +193,7 @@ private:
 
     cv::Mat currentImage;
     QTimer *liveTimer = nullptr;
+    QTimer *saveTimer = nullptr;
     AT_64 imageSizeBytes;
     AT_64 imageWidth;
     AT_64 imageHeight;
