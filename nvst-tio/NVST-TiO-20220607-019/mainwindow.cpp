@@ -737,8 +737,8 @@ void MainWindow::stopACQ(){
     ui->btnSnap->setText("Start Acquistion");
     fserialNo=0;
     serialNo=0;
-    //if(fpre=="FLAT")
-        //flatcnt=flatcnt+1;
+    if(fpre=="FLAT")
+        flatcnt=flatcnt+1;
 }
 
 void MainWindow::on_btnSnap_pressed() {
@@ -926,8 +926,8 @@ void MainWindow::on_btnSnap_pressed() {
         sum_fserialNo=sum_fserialNo+fserialNo;
         fserialNo=0;
         serialNo=0;
-        //if(fpre=="FLAT")
-            //flatcnt=flatcnt+1;
+        if(fpre=="FLAT")
+            flatcnt=flatcnt+1;
         ui->lineEdit_objname->setEnabled(true);
         ui->lineEdit_cor1->setEnabled(true);
         ui->lineEdit_cor2->setEnabled(true);
