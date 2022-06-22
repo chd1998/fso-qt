@@ -146,7 +146,7 @@ void aCCD::getData()
     unpackedBufferback01=unpackedBuffer01;
     //Declare the number of buffers and the number of frames interested in
     int NumberOfBuffers = numBuffer;
-    int NumberOfFrames = frameRate+1;
+    int NumberOfFrames= frameRate+1;
     //Allocate a number of memory buffers to store frames
     unsigned char** AcqBuffers = new unsigned char*[NumberOfBuffers];
     unsigned char** AlignedBuffers = new unsigned char*[NumberOfBuffers];
@@ -189,8 +189,8 @@ void aCCD::getData()
         }
         if(fpre=="FLAT")
         {
-            //QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
-            QString fcnt = current_date_t2;
+            QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
+            //QString fcnt = current_date_t2;
             saveDir=savepref+fcnt;
             QDir *fdir = new QDir(saveDir);
             QDir tmpdir(saveDir);
@@ -218,18 +218,18 @@ void aCCD::getData()
 
     AT_Command(handle, L"AcquisitionStart");
     int saveStatus;
-    if(localsave)
+    if(localsave && fpre=="T")
     {
         t1=QDateTime::currentDateTime();
         lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
     }
 
-    for (int i=0; i < NumberOfFrames && !localfirst; i++) {
+    for (int i=0; i < NumberOfFrames; i++) {
         //if btnSanp pressed during readout loop, break it to restart
-        /*if(localfirst)
+        if(localfirst)
         {
             break;
-        }*/
+        }
          AT_WaitBuffer(handle, &buffer, &BufSize, AT_INFINITE);
          //Application specific data processing goes here..
          AT_WC pixelEncoding[255] = {0};
@@ -294,12 +294,12 @@ void aCCD::getData()
          //Re-queue the buffers
          AT_QueueBuffer(handle, AlignedBuffers[i%NumberOfBuffers], bufferSize);
          //if btnSanp pressed during readout loop, break it to restart
-         /*if(localfirst)
+         if(localfirst)
          {
              break;
-         }*/
+         }
          //if not localsave--->break and start new acq
-         if(!localsave)
+         if(!localsave && fpre=="T")
          {
              t2=QDateTime::currentDateTime();
              lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
@@ -314,7 +314,7 @@ void aCCD::getData()
 
         }//end of num. of frames,for loop
 
-    if(localsave && !localfirst)
+    if(localsave && !localfirst && fpre=="T")
     {
         t2=QDateTime::currentDateTime();
         lt2=t2.toSecsSinceEpoch();  //获取当前时间戳

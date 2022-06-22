@@ -684,7 +684,6 @@ void MainWindow::stopACQ(){
             }
         }
 
-
         //if((fpre=="FLAT" && (fserialNo % 2000)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % 1000)==0 && fserialNo>0))
         if((fpre=="FLAT" && (fserialNo % datanum)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % datanum)==0 && fserialNo>0))
         {
@@ -738,8 +737,8 @@ void MainWindow::stopACQ(){
     ui->btnSnap->setText("Start Acquistion");
     fserialNo=0;
     serialNo=0;
-    if(fpre=="FLAT")
-        flatcnt=flatcnt+1;
+    //if(fpre=="FLAT")
+        //flatcnt=flatcnt+1;
 }
 
 void MainWindow::on_btnSnap_pressed() {
@@ -770,6 +769,7 @@ void MainWindow::on_btnSnap_pressed() {
         if(ui->checkBox_Flat->isChecked()){
             fpre="FLAT";
             //savepref=saveTo+current_date_d+"\\TIO\\FLAT";
+            flatcnt=0;
             datanum=ui->lineEdit_flatnum->text().toUInt();
             if((datanum % 2000) != 0 )
                 datanum=2000;
@@ -926,8 +926,8 @@ void MainWindow::on_btnSnap_pressed() {
         sum_fserialNo=sum_fserialNo+fserialNo;
         fserialNo=0;
         serialNo=0;
-        if(fpre=="FLAT")
-            flatcnt=flatcnt+1;
+        //if(fpre=="FLAT")
+            //flatcnt=flatcnt+1;
         ui->lineEdit_objname->setEnabled(true);
         ui->lineEdit_cor1->setEnabled(true);
         ui->lineEdit_cor2->setEnabled(true);
@@ -1089,6 +1089,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
             ui->textEdit_status->append(ccdM);
             labelStat->setText(" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
         }else{
+            //sum_fserialNo=sum_fserialNo+fserialNo;
             labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
         }
         //display=false;
