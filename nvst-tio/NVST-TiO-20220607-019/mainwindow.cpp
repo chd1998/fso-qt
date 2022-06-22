@@ -60,7 +60,8 @@ bool firsttime=true,localsave=false,localfirst=false;;
 QString objname="Sun";
 QString obscor1="N00",obscor2="E00";
 QString datatype="TiO";
-int flatcnt=0;
+uint flatcnt=0;
+QString fcnt;
 QFile obslog;
 QString obslogfile,obslogdir,obslogdate,logtmp,obsname;
 std::ofstream outfile;
@@ -792,6 +793,7 @@ void MainWindow::on_btnSnap_pressed() {
             saveDir=savepre;
             localsave=true;
             localfirst=true;
+            fcnt = current_date_t1;
             //if(!tmpdir.exists(saveDir))
                 //tmpdir.mkpath(saveDir);
         }

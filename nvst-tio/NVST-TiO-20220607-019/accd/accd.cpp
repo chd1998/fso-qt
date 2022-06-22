@@ -189,7 +189,7 @@ void aCCD::getData()
         }
         if(fpre=="FLAT")
         {
-            QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
+            //QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
             //QString fcnt = current_date_t2;
             saveDir=savepref+fcnt;
             QDir *fdir = new QDir(saveDir);
