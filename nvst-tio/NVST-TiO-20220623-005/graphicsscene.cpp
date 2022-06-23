@@ -1,7 +1,11 @@
 #include "graphicsscene.h"
 #include "mainwindow.h"
 
-GraphicsScene::GraphicsScene(QWidget * parent): QGraphicsScene(parent) {}
+GraphicsScene::GraphicsScene(QWidget * parent): QGraphicsScene(parent) {
+    //set cache for display
+    //setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+    //QPixmapCache::setCacheLimit(102400);    //default=10240kB
+}
 
 void GraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     if(event->buttons()&Qt::LeftButton){

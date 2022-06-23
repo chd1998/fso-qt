@@ -2,6 +2,7 @@
 #define GRAPHICSSCENE_H
 
 #include <QGraphicsView>
+#include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 
 class GraphicsScene : public QGraphicsScene {

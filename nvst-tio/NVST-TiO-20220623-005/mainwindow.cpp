@@ -8,6 +8,7 @@
 #include <QPoint>
 #include <QPointer>
 #include <QGraphicsPixmapItem>
+//#include <QGraphicsItem>
 #include <QImage>
 #include <QPixmap>
 #include <QGraphicsView>
@@ -38,7 +39,7 @@
 
 double expTime=1.2;
 int frameRate=200;
-uint framedelay=5,groupdelay=30,fps0=0,fps1=0,fps=0;
+uint framedelay=10,groupdelay=30,fps0=0,fps1=0,fps=0;
 int frameRateMax=200;
 QString saveTo="e:\\",savepre="",savepred="",savepref="",ccdM,saveDir="",savepreobj,savepredf,save01="";
 //QString current_date_d;
@@ -230,10 +231,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     }
     //connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView);
     scene = new GraphicsScene();
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     ui->graphicsView->setScene(scene);
 
     ui->textEdit_status->setReadOnly(true);
     ui->graphicsView->setMouseTracking(true);
+    ui->graphicsView->setCacheMode(QGraphicsView::CacheBackground);
+    ui->graphicsView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff );
     connect(scene, &GraphicsScene::positionMoved, this, &MainWindow::updateCursorCoord);
     connect(scene, &GraphicsScene::RectPoint1, this, &MainWindow::selectStartpoint);
     connect(scene, &GraphicsScene::RectPoint2, this, &MainWindow::drawRect);
@@ -266,6 +272,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->lineEdit_objname->setEnabled(false);
     ui->lineEdit_cor1->setEnabled(false);
     ui->lineEdit_cor2->setEnabled(false);
+
+    //set cache for display
+    //setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+    QPixmapCache::setCacheLimit(102400);    //default=10240kB
+
     //绘制直方图
     QVector<unsigned short>vechistdata0(65536,0);
     int histmax0=1000;
@@ -735,6 +746,35 @@ void MainWindow::stopACQ(){
     serialNo=0;
     if(fpre=="FLAT")
         flatcnt=flatcnt+1;
+    ui->lineEdit_saveto->setEnabled(true);
+    ui->lineEdit_savelog->setEnabled(true);
+    if(ui->checkBox_Data->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(true);
+        ui->lineEdit_cor1->setEnabled(true);
+        ui->lineEdit_cor2->setEnabled(true);
+        ui->lineEdit_datanum->setEnabled(true);
+        ui->lineEdit_darknum->setEnabled(false);
+        ui->lineEdit_flatnum->setEnabled(false);
+    }
+    if(ui->checkBox_Flat->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
+        ui->lineEdit_datanum->setEnabled(false);
+        ui->lineEdit_darknum->setEnabled(false);
+        ui->lineEdit_flatnum->setEnabled(true);
+    }
+    if(ui->checkBox_Dark->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
+        ui->lineEdit_datanum->setEnabled(false);
+        ui->lineEdit_darknum->setEnabled(true);
+        ui->lineEdit_flatnum->setEnabled(false);
+    }
 }
 
 void MainWindow::on_btnSnap_pressed() {
@@ -864,6 +904,7 @@ void MainWindow::on_btnSnap_pressed() {
     }else
     {
         ui->btnSnap->setText("Start Acquisition");
+        ui->btnSnap->setEnabled(true);
         //localfirst=false;
 
         ui->textEdit_status->append("Waiting for Saving Data...");
@@ -885,7 +926,7 @@ void MainWindow::on_btnSnap_pressed() {
         savefits=false;
         localsave=false;
         localfirst=false;
-        ui->btnSnap->setEnabled(true);
+
         if(fpre=="T")
             datatype="TiO";
         else
@@ -925,14 +966,43 @@ void MainWindow::on_btnSnap_pressed() {
         serialNo=0;
         if(fpre=="FLAT")
             flatcnt=flatcnt+1;
-        ui->lineEdit_objname->setEnabled(true);
-        ui->lineEdit_cor1->setEnabled(true);
-        ui->lineEdit_cor2->setEnabled(true);
+        //ui->lineEdit_objname->setEnabled(true);
+        //ui->lineEdit_cor1->setEnabled(true);
+        //ui->lineEdit_cor2->setEnabled(true);
         //saveTimer->stop();
         //disconnect(saveTimer, &QTimer::timeout, this, &MainWindow::periodicSave);
         //saveTimer->deleteLater();
 
         //delete saveTimer;
+        ui->lineEdit_saveto->setEnabled(true);
+        ui->lineEdit_savelog->setEnabled(true);
+        if(ui->checkBox_Data->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(true);
+            ui->lineEdit_cor1->setEnabled(true);
+            ui->lineEdit_cor2->setEnabled(true);
+            ui->lineEdit_datanum->setEnabled(true);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
+        if(ui->checkBox_Flat->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(true);
+        }
+        if(ui->checkBox_Dark->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(true);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
     }
 }
 
@@ -1004,6 +1074,29 @@ void MainWindow::drawHist(QVector<uint>vechistdata,uint histmax,uint histidx)
 
 void MainWindow::displayOK(){
         display=true;
+        if(savefits)
+                {
+                    ccdM="";
+                    QString numf = QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'));
+                    if(fpre=="T")
+                        datatype="TiO";
+                    else
+                        datatype=fpre;
+                    ccdM=datatype+" Acquired "+numf+" Frame(s)...";
+                    ui->textEdit_status->setFocus();
+                    QTextCursor storeCursorPos = ui->textEdit_status->textCursor();
+                    ui->textEdit_status->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
+                    ui->textEdit_status->moveCursor(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+                    ui->textEdit_status->moveCursor(QTextCursor::End, QTextCursor::KeepAnchor);
+                    ui->textEdit_status->textCursor().removeSelectedText();
+                    ui->textEdit_status->textCursor().deletePreviousChar();
+                    ui->textEdit_status->setTextCursor(storeCursorPos);
+                    ui->textEdit_status->append(ccdM);
+                    labelStat->setText(datatype+" : Saving "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
+                }else{
+                    labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
+                }
+
 }
 
 /*void MainWindow::periodicSave(uint dt)
@@ -1023,9 +1116,9 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
     displock.lock();
     display_locked=true;
     //if(live && NULL != buf && display )
-    if(live)
+    if(live && display)
     {
-        QImage *qimage;
+        //QImage *qimage;
         currentImage = cv::Mat(static_cast<int>(imgH), static_cast<int>(imgW), CV_16UC1, buf);
         double minVal;
         double maxVal;
@@ -1042,31 +1135,31 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
             cv::normalize(currentImage, lossyImage, 0, 255, cv::NORM_MINMAX, CV_8U);
         else
         {
-            histcalc_lock.unlock();
+            //histcalc_lock.unlock();
             return;
         }
         if(drawing && live)
             rectangle(lossyImage, cv::Point(static_cast<int>(sx), static_cast<int>(sy)), cv::Point(static_cast<int>(ex),static_cast<int>(ey)), RGB(0,0,0), 4,8,0);
         //rectangle(lossyImage, cv::Point(static_cast<int>(sx), static_cast<int>(sy)), cv::Point(static_cast<int>(ex),static_cast<int>(ey)), cv::Scalar(255, 0, 255), 4, 8, 0);
         //QImage qimage = QImage(static_cast<unsigned char *>(lossyImage.data), lossyImage.cols, lossyImage.rows, static_cast<int>(lossyImage.step), QImage::Format_Grayscale8);
-        qimage= new QImage(static_cast<unsigned char *>(lossyImage.data), lossyImage.cols, lossyImage.rows, static_cast<int>(lossyImage.step), QImage::Format_Indexed8);
-        //QImage qimage_copy;
-        //qimage_copy=qimage->copy(QRect());
-        //emit histReady(qimage_copy);
+        //qimage= new QImage(static_cast<unsigned char *>(lossyImage.data), lossyImage.cols, lossyImage.rows, static_cast<int>(lossyImage.step), QImage::Format_Indexed8);
+
         scene->clear();
-        ui->graphicsView->update();
-        item = new QGraphicsPixmapItem(QPixmap::fromImage(*qimage));
+        ui->graphicsView->viewport()->update();
+        //item = new QGraphicsPixmapItem(QPixmap::fromImage(*qimage));
+        item = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(static_cast<unsigned char *>(lossyImage.data), lossyImage.cols, lossyImage.rows, static_cast<int>(lossyImage.step), QImage::Format_Indexed8)));
         scene->addItem(item);
         //scene->setSceneRect(QRectF(0, 0, scene->height(), scene->width()));
         //scene->setSceneRect(QRectF(0, 0, imgH, imgW));
         scene->setSceneRect(QRectF(0, 0, lossyImage.cols, lossyImage.rows));
         ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
         //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
-        ui->graphicsView->update();
+        ui->graphicsView->viewport()->update();
+        //ui->graphicsView->;
         currentImage.release();
-        delete qimage;
+        //delete qimage;
 
-        if(savefits)
+        /*if(savefits)
         {
             ccdM="";
             QString numf = QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'));
@@ -1086,15 +1179,11 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
             ui->textEdit_status->append(ccdM);
             labelStat->setText(" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
         }else{
-            //sum_fserialNo=sum_fserialNo+fserialNo;
             labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
-        }
-        //display=false;
-        //histcalc_lock.unlock();
-
-
+        }*/
+        fps1=fps1+1;
     }
-   fps1=fps1+1;
+
    displock.unlock();
    display_locked=false;
    display=false;
