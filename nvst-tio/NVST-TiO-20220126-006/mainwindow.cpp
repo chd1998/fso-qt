@@ -622,6 +622,35 @@ void MainWindow::stopACQ(){
     serialNo=0;
     if(fpre=="FLAT")
         flatcnt=flatcnt+1;
+    ui->lineEdit_saveto->setEnabled(true);
+    ui->lineEdit_savelog->setEnabled(true);
+    if(ui->checkBox_Data->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(true);
+        ui->lineEdit_cor1->setEnabled(true);
+        ui->lineEdit_cor2->setEnabled(true);
+        ui->lineEdit_datanum->setEnabled(true);
+        ui->lineEdit_darknum->setEnabled(false);
+        ui->lineEdit_flatnum->setEnabled(false);
+    }
+    if(ui->checkBox_Flat->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
+        ui->lineEdit_datanum->setEnabled(false);
+        ui->lineEdit_darknum->setEnabled(false);
+        ui->lineEdit_flatnum->setEnabled(true);
+    }
+    if(ui->checkBox_Dark->isChecked())
+    {
+        ui->lineEdit_objname->setEnabled(false);
+        ui->lineEdit_cor1->setEnabled(false);
+        ui->lineEdit_cor2->setEnabled(false);
+        ui->lineEdit_datanum->setEnabled(false);
+        ui->lineEdit_darknum->setEnabled(true);
+        ui->lineEdit_flatnum->setEnabled(false);
+    }
 }
 
 void MainWindow::on_btnSnap_pressed() {
@@ -789,9 +818,35 @@ void MainWindow::on_btnSnap_pressed() {
         serialNo=0;
         if(fpre=="FLAT")
             flatcnt=flatcnt+1;
-        ui->lineEdit_objname->setEnabled(true);
-        ui->lineEdit_cor1->setEnabled(true);
-        ui->lineEdit_cor2->setEnabled(true);
+        ui->lineEdit_saveto->setEnabled(true);
+        ui->lineEdit_savelog->setEnabled(true);
+        if(ui->checkBox_Data->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(true);
+            ui->lineEdit_cor1->setEnabled(true);
+            ui->lineEdit_cor2->setEnabled(true);
+            ui->lineEdit_datanum->setEnabled(true);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
+        if(ui->checkBox_Flat->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(true);
+        }
+        if(ui->checkBox_Dark->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(true);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
     }
 }
 
@@ -852,10 +907,10 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
             ui->textEdit_status->textCursor().deletePreviousChar();
             ui->textEdit_status->setTextCursor(storeCursorPos);
             ui->textEdit_status->append(ccdM);
-            labelStat->setText(" "+QString("%1").arg(fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s)");
+            labelStat->setText(datatype+" "+QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s)");
         }
         else
-            labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 6, 10, QLatin1Char('0'))+" Frame(s) Saved");
+            labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
         display=false;
     }
 }
