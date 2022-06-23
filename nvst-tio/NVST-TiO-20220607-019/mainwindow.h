@@ -75,28 +75,22 @@ extern uint flatcnt;
 extern QFile obslog;
 extern QString obslogfile,obslogdir,obslogdate,obsname;
 extern std::ofstream outfile;
-extern QMutex mutex,histlock,histdisplock;
+extern QMutex mutex,histcalc_lock,histdisplock;
 extern quint16 imgMax,freedisk;
 extern double sx,sy,ex,ey;
-extern bool drawing,continousACQ,fulldisk;
+extern bool drawing,continousACQ,diskfull;
 extern QString current_date_d;
 extern QString current_date_t1,current_date_t2,current_date_t3;
 extern QDir sdir;
-extern QImage *histimg;
-//extern QBarSet *set ;
+
+//global vars. for histogram
 extern QLineSeries *lineseries ;
 extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern QString fcnt;
-//extern int histmax,histidx;
-//extern QVector<unsigned short>vecimg;
-//extern QVector<unsigned short>vechistdata;
 extern bool histfirst;
-//extern QChart *chart;
 
-//extern QTextStream obsout;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

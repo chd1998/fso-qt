@@ -33,7 +33,7 @@ void histdisplay::working()
 
 void histdisplay::buf2hist(unsigned short* localvecimg,uint imglen)
 {
-    histlock.lock();
+    histcalc_lock.lock();
     histcalc_locked=true;
     if(!histshow_locked && live)
     {       
@@ -71,7 +71,7 @@ void histdisplay::buf2hist(unsigned short* localvecimg,uint imglen)
         //    QCoreApplication::processEvents();
         //}
     }
-    histlock.unlock();
+    histcalc_lock.unlock();
     //display delayed for 50ms
     QElapsedTimer t1;
     t1.start();

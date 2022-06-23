@@ -171,7 +171,7 @@ void aCCD::getData()
     QDateTime current_date_time =QDateTime::currentDateTimeUtc();
     current_date_d =current_date_time.toString("yyyyMMdd");
     current_date_t2 =current_date_time.toString("hhmmss");
-    if(savefits && !fulldisk )
+    if(savefits && !diskfull )
     {
         if(fpre=="T" && localsave)
         {
@@ -191,7 +191,7 @@ void aCCD::getData()
         {
             //QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
             //QString fcnt = current_date_t2;
-            saveDir=savepref+fcnt;
+            saveDir=savepref+current_date_t1;
             QDir *fdir = new QDir(saveDir);
             QDir tmpdir(saveDir);
             QStringList filter;
@@ -241,7 +241,7 @@ void aCCD::getData()
 
          //qDebug()<<"Saving : "<<QString::number(fserialNo);
          saveStatus=1;
-         if(savefits && i >= 1 && !fulldisk ){
+         if(savefits && i >= 1 && !diskfull ){
            if(fpre=="T")
            {
                if(localsave)
@@ -353,12 +353,12 @@ void aCCD::getData()
     //saveDir="";
     if(freedisk<=3)
     {
-        fulldisk=true;
+        diskfull=true;
         savefits=false;
         emit stop_Acq();
         //break;
     }else
-        fulldisk=false;
+        diskfull=false;
     //fitslock.unlock();
     //savefits_locked=false;
     if(localfirst)

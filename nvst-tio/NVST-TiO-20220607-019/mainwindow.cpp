@@ -61,32 +61,27 @@ QString objname="Sun";
 QString obscor1="N00",obscor2="E00";
 QString datatype="TiO";
 uint flatcnt=0;
-QString fcnt;
+//QString fcnt;
 QFile obslog;
 QString obslogfile,obslogdir,obslogdate,logtmp,obsname;
 std::ofstream outfile;
-QMutex mutex,histlock,histdisplock;
+QMutex mutex,histcalc_lock,histdisplock;
 quint16 imgMax=0,freedisk;
 double sx=200,sy=200,ex=800,ey=800;
 bool drawing=false;
 int flatnum=2000,darknum=1000;
 uint datanum=200;
-bool continousACQ=false,fulldisk=false;
+bool continousACQ=false,diskfull=false;
 QDir sdir;
 QString current_date_t1,current_date_t2,current_date_t3,current_date_d;
+//global vars. for histogram
 QLineSeries *lineseries = nullptr;
 QAreaSeries *series = nullptr;
-QImage *histimg=nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-//QVector<unsigned short>vecimg(3000*3000,0);
-//QVector<unsigned short>vechistdata(65536,0);
-//int histmax=0,histidx=32768;
-bool histfirst=true;
-//QChart *chart;
 
-//QTextStream obsout;
+bool histfirst=true;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
 
@@ -358,7 +353,7 @@ quint64 MainWindow::getDiskSpace(QString iDriver, bool flag)
     {
         freedisk=(quint64) totalFreeDiskSpace.QuadPart/GB;
         if(freedisk<=3)
-            fulldisk=true;
+            diskfull=true;
         return (quint64) totalFreeDiskSpace.QuadPart/GB;
     }
 }
@@ -722,7 +717,7 @@ void MainWindow::stopACQ(){
         logtmp=datatype+" acquired "+numf+" frames...";
     ui->textEdit_status->append(logtmp);
     outfile<<logtmp.toStdString()<<"\n";
-    if(fulldisk)
+    if(diskfull)
     {
         logtmp="Acquisition Disk "+saveTo+" is full...";
         outfile<<logtmp.toStdString()<<"\n";
@@ -744,7 +739,7 @@ void MainWindow::stopACQ(){
 
 void MainWindow::on_btnSnap_pressed() {
     //if(!savefits && live && opened)
-    if(!savefits  && live && opened && !fulldisk )
+    if(!savefits  && live && opened && !diskfull )
     {
         localfirst=true;
         //localsave=true;
@@ -793,7 +788,7 @@ void MainWindow::on_btnSnap_pressed() {
             saveDir=savepre;
             localsave=true;
             localfirst=true;
-            fcnt = current_date_t1;
+            //fcnt = current_date_t1;
             //if(!tmpdir.exists(saveDir))
                 //tmpdir.mkpath(saveDir);
         }
@@ -909,7 +904,7 @@ void MainWindow::on_btnSnap_pressed() {
         QString numf = QString("%1").arg(fserialNo, 8, 10, QLatin1Char('0'));
         logtmp=datatype+" acquired "+numf+" frame(s)...";
         ui->textEdit_status->append(logtmp);
-        if(fulldisk)
+        if(diskfull)
         {
             ui->textEdit_status->append(saveTo+" is full...");
             logtmp=saveTo+" is full...";
@@ -1047,7 +1042,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
             cv::normalize(currentImage, lossyImage, 0, 255, cv::NORM_MINMAX, CV_8U);
         else
         {
-            histlock.unlock();
+            histcalc_lock.unlock();
             return;
         }
         if(drawing && live)
@@ -1095,7 +1090,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf) {
             labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
         }
         //display=false;
-        //histlock.unlock();
+        //histcalc_lock.unlock();
 
 
     }
