@@ -201,13 +201,17 @@ void aCCD::getData()
 
     AT_Command(handle, L"AcquisitionStart");
     int saveStatus;
-    if(localsave)
+    if(localsave && fpre=="T")
     {
         t1=QDateTime::currentDateTime();
         lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
         //localfirst=false;
     }
     for (int i=0; i < NumberOfFrames; i++) {
+        if(localfirst)
+        {
+            break;
+        }
          AT_WaitBuffer(handle, &buffer, &BufSize, AT_INFINITE);
          //Application specific data processing goes here..
          AT_WC pixelEncoding[255] = {0};
@@ -251,7 +255,11 @@ void aCCD::getData()
          }//end of savefits
          //Re-queue the buffers
          AT_QueueBuffer(handle, AlignedBuffers[i%NumberOfBuffers], bufferSize);
-         if(!localsave)
+         if(localfirst)
+         {
+             break;
+         }
+         if(!localsave && fpre=="T")
          {
              t2=QDateTime::currentDateTime();
              lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
@@ -264,7 +272,7 @@ void aCCD::getData()
 
          }
         }//end of num. of frames
-    if(localsave)
+    if(localsave && !localfirst && fpre=="T")
     {
         t2=QDateTime::currentDateTime();
         lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
@@ -308,6 +316,8 @@ void aCCD::getData()
         fulldisk=false;
     //AT_Close(handle);
     //AT_FinaliseLibrary();
+    if(localfirst)
+        localfirst=false;
 }
 
 int aCCD::saveData(QString savePath,unsigned short* buff)
