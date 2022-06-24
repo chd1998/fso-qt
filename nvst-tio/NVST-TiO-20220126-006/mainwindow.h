@@ -65,6 +65,7 @@ extern bool drawing,continousACQ,fulldisk;
 extern QString current_date_d;
 extern QString current_date_t1,current_date_t2,current_date_t3;
 extern QDir sdir;
+extern uint fps,fps0,fps1;
 
 //extern QTextStream obsout;
 

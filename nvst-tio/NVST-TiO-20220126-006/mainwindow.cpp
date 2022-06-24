@@ -72,6 +72,7 @@ uint datanum=200;
 bool continousACQ=false,fulldisk=false;
 QDir sdir;
 QString current_date_t1,current_date_t2,current_date_t3,current_date_d;
+uint fps=0,fps0=0,fps1=0;
 
 //QTextStream obsout;
 
@@ -323,6 +324,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::showTime()
 {
+    fps=fps1-fps0;
+    fps0=fps1;
     QString diskname;
     QDateTime current_date_time =QDateTime::currentDateTime();
     if(opened)
@@ -332,7 +335,7 @@ void MainWindow::showTime()
     long t1 = current_date_time.toSecsSinceEpoch();
     float dt = (float)(t1-t0)/3600.0;
     QString angle_sign=u8"°C";
-    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || Up Time: "+QString::number(dt,'f',4)+"hrs || Sensor: "+QString::number(temperature)+angle_sign;
+    QString current_date =current_date_time.toString("yyyy-MM-dd hh:mm:ss")+" || Up Time: "+QString::number(dt,'f',4)+"hrs || Sensor: "+QString::number(temperature)+angle_sign+" || FPS: "+QString("%1").arg(fps, 3, 10, QLatin1Char('0'))+" Frames/Sec.";
     ui->label_time->setText(current_date);
     diskname=ui->lineEdit_saveto->text();
     quint64 freeDiskSpace = getDiskSpace(diskname, false);
@@ -912,6 +915,7 @@ void MainWindow::updateGraphicsView(unsigned short* buf,uint buflen) {
         else
             labelStat->setText(" Stopped - "+QString("%1").arg(sum_fserialNo, 8, 10, QLatin1Char('0'))+" Frame(s) Saved");
         display=false;
+        fps1=fps1+1;
     }
 }
 
