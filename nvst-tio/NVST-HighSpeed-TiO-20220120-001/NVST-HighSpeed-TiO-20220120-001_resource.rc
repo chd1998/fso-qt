@@ -1,6 +1,6 @@
 #include <windows.h>
 
-IDI_ICON1	ICON	"D:\\mywork\\qt\\andor-TiO\\NVST-TiO-20220120-003\\assets\\icon.ico"
+IDI_ICON1	ICON	"D:\\mywork\\qt\\andor-TiO\\NVST-HighSpeed-TiO-20220120-001\\assets\\icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,0,0,0
@@ -23,8 +23,8 @@ VS_VERSION_INFO VERSIONINFO
 				VALUE "FileDescription", "\0"
 				VALUE "FileVersion", "0.0.0.0\0"
 				VALUE "LegalCopyright", "\0"
-				VALUE "OriginalFilename", "NVST-TiO-20220120-005.exe\0"
-				VALUE "ProductName", "NVST-TiO-20220120-005\0"
+				VALUE "OriginalFilename", "NVST-HighSpeed-TiO-20220120-001.exe\0"
+				VALUE "ProductName", "NVST-HighSpeed-TiO-20220120-001\0"
 				VALUE "ProductVersion", "0.0.0.0\0"
 				VALUE "InternalName", "\0"
 				VALUE "Comments", "\0"
