@@ -93,10 +93,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     obsname=obslogdir+"\\TiO-"+obslogdate+".log";
     outfile.open(obsname.toStdString(), std::ios::app);
 
-    //ui->btnLive->setEnabled(false);
-    //ui->btnSnap->setEnabled(false);
-    //ui->actionServer->setEnabled(false);
-    //ui->verticalLayout_2->setAlignment(Qt::AlignTop);
+
     QString proFullPath=QCoreApplication::applicationFilePath();
     QFileInfo tmpinfo(proFullPath);
     QString proName=tmpinfo.fileName();
@@ -538,6 +535,33 @@ void MainWindow::on_btnLive_pressed() {
         ui->lineEdit_exposuretime->setEnabled(true);
         ui->lineEdit_framerate->setEnabled(true);
         ui->lineEdit_groupdelay->setEnabled(true);
+        if(ui->checkBox_Data->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(true);
+            ui->lineEdit_cor1->setEnabled(true);
+            ui->lineEdit_cor2->setEnabled(true);
+            ui->lineEdit_datanum->setEnabled(true);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
+        if(ui->checkBox_Flat->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(true);
+        }
+        if(ui->checkBox_Dark->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(true);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
     }
 
 }

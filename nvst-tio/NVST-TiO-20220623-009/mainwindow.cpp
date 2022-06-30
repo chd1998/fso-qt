@@ -153,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             //connect(task, &histdisplay::finished, this,  &MainWindow::slotFinished);
             connect(histthread, &QThread::finished, histthread, &QThread::deleteLater);
 
-            connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView);
+            connect(andorCCD,&aCCD::buf_Ready,this,&MainWindow::updateGraphicsView,Qt::QueuedConnection);
             connect(andorCCD,&aCCD::buf_Ready,task,&histdisplay::buf2hist,Qt::DirectConnection);
             connect(andorCCD,&aCCD::stop_Acq,this,&MainWindow::stopACQ,Qt::DirectConnection);
             connect(task,&histdisplay::draw_hist,this,&MainWindow::drawHist,Qt::BlockingQueuedConnection);
@@ -604,16 +604,8 @@ void MainWindow::on_btnLive_pressed() {
         ui->lineEdit_exposuretime->setEnabled(false);
         ui->lineEdit_framerate->setEnabled(false);
         ui->lineEdit_groupdelay->setEnabled(false);
-        /*ui->lineEdit_objname->setEnabled(false);
-        ui->lineEdit_cor1->setEnabled(false);
-        ui->lineEdit_cor2->setEnabled(false);
-        ui->lineEdit_darknum->setEnabled(false);
-        ui->lineEdit_flatnum->setEnabled(false);
-        ui->lineEdit_datanum->setEnabled(false);
-        ui->lineEdit_saveto->setEnabled(false);
-        ui->lineEdit_savelog->setEnabled(false);*/
+
         labelinfo->setText(QString::number(imgH)+"x"+QString::number(imgW)+" 16bits");
-        //*histimg = QImage(imgH,imgW,QImage::Format_Indexed8);
     }
     else {
         live=false;
@@ -657,17 +649,41 @@ void MainWindow::on_btnLive_pressed() {
         }
         mutex.unlock();
         ui->btnSnap->setText("Start Acquisition");
+        ui->btnSnap->setEnabled(false);
         ui->lineEdit_exposuretime->setEnabled(true);
         ui->lineEdit_framerate->setEnabled(true);
-        ui->lineEdit_objname->setEnabled(true);
-        ui->lineEdit_cor1->setEnabled(true);
-        ui->lineEdit_cor2->setEnabled(true);
-        ui->lineEdit_darknum->setEnabled(true);
-        ui->lineEdit_flatnum->setEnabled(true);
-        ui->lineEdit_datanum->setEnabled(true);
         ui->lineEdit_saveto->setEnabled(true);
         ui->lineEdit_savelog->setEnabled(true);
         ui->lineEdit_groupdelay->setEnabled(true);
+
+        if(ui->checkBox_Data->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(true);
+            ui->lineEdit_cor1->setEnabled(true);
+            ui->lineEdit_cor2->setEnabled(true);
+            ui->lineEdit_datanum->setEnabled(true);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
+        if(ui->checkBox_Flat->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(false);
+            ui->lineEdit_flatnum->setEnabled(true);
+        }
+        if(ui->checkBox_Dark->isChecked())
+        {
+            ui->lineEdit_objname->setEnabled(false);
+            ui->lineEdit_cor1->setEnabled(false);
+            ui->lineEdit_cor2->setEnabled(false);
+            ui->lineEdit_datanum->setEnabled(false);
+            ui->lineEdit_darknum->setEnabled(true);
+            ui->lineEdit_flatnum->setEnabled(false);
+        }
+
     }
 
 }

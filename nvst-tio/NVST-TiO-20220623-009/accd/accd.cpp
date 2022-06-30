@@ -280,8 +280,8 @@ void aCCD::getData()
          //{
             //if(live && !display_locked && display)
             //if(live && display)
-            //if(live && !display_locked)
-        emit buf_Ready(unpackedBufferback,buflen);
+        if(live && !display_locked && display)
+            emit buf_Ready(unpackedBufferback,buflen);
         //if(!histcalc_locked && live)
         //{
 
