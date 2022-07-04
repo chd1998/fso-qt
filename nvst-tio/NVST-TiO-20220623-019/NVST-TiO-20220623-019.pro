@@ -7,17 +7,21 @@
 #-------------------------------------------------
 
 QT       += core gui network
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 
-TARGET = NVST-TiO-20220126-006
+CONFIG += c++17
+
+TARGET = NVST-TiO-20220623-019
 TEMPLATE = app
 
 #QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O1
 #QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O2
-#QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O3
-QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO -= -Od
-QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -Od
+QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O3
+#QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO -= -Od
+#QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -Od
 
 UI_DIR=./
 
@@ -43,6 +47,7 @@ CONFIG += c++11
 
 SOURCES += \
     accd/accd.cpp \
+    histdisplay/histdisplay.cpp \
         main.cpp \
         mainwindow.cpp \
     time_sys/time_sys.cpp \
@@ -58,6 +63,7 @@ HEADERS += \
     cfitsio/fitsio.h \
     cfitsio/group.h \
     cfitsio/longnam.h \
+    histdisplay/histdisplay.h \
     mainwindow.h \
     opencv2/core.hpp \
     opencv2/core/base.hpp \

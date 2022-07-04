@@ -75,7 +75,7 @@ int aCCD::init_aCCD()
             i_retCode=0;
             CamM="TiO";
             ccdM=QString::number(realDev)+" "+CamM+" "+CamN+" Device(s) Found...";
-            localsave=true;
+            //localsave=true;
         }
         else
         {
@@ -106,7 +106,7 @@ void aCCD::run()
     //t1=QDateTime::currentDateTime();
     //lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
     //bool localfirst=true;
-    localsave=true;
+    //localsave=true;
     while (!isInterruptionRequested())
     {
         if(live)
@@ -114,9 +114,8 @@ void aCCD::run()
 
             getData();
 
+
         }
-        //if(QThread::currentThread()->isInterruptionRequested())
-            //break;
     }
     AT_Command(handle, L"AcquisitionStop");
     AT_Flush(handle);
@@ -130,20 +129,24 @@ void aCCD::run()
 
 void aCCD::getData()
 {
-    //QDir dir;
-    uint len = (imgW*imgH)/2;
+    //QMutex fitslock;
+    //fitslock.lock();
+    //savefits_locked=true;
     AT_SetFloat(handle, L"ExposureTime", expTime/1000.0);
     AT_GetInt(handle, L"ImageSizeBytes", &imageSizeBytes);
     int bufferSize = static_cast<int>(imageSizeBytes);
     buffer = new unsigned char[bufferSize];
     bufferback=buffer;
     //qDebug("1.5.1");
+    uint buflen=imgW*imgH;
     unpackedBuffer = new unsigned short[imgW * imgH];
     //uint len = (sizeof(unpackedBufferback)/sizeof(unpackedBufferback[0]));
     unpackedBufferback=unpackedBuffer;
+    unpackedBuffer01=new unsigned short[imgW * imgH];
+    unpackedBufferback01=unpackedBuffer01;
     //Declare the number of buffers and the number of frames interested in
     int NumberOfBuffers = numBuffer;
-    int NumberOfFrames = frameRate+1;
+    int NumberOfFrames= frameRate+1;
     //Allocate a number of memory buffers to store frames
     unsigned char** AcqBuffers = new unsigned char*[NumberOfBuffers];
     unsigned char** AlignedBuffers = new unsigned char*[NumberOfBuffers];
@@ -153,7 +156,7 @@ void aCCD::getData()
     }
     AT_Flush(handle);
     for(int i=0; i < NumberOfBuffers; i++) {
-     AT_QueueBuffer(handle, AlignedBuffers[i], bufferSize);
+        AT_QueueBuffer(handle, AlignedBuffers[i], bufferSize);
     }
 
     AT_SetEnumString(handle, L"CycleMode", L"Continuous");
@@ -164,10 +167,11 @@ void aCCD::getData()
     //e:\20211008\TIO\dark\062905\062905
     //e:\20211008\TIO\FLAT00
     //e:\20211008\TIO\12882\071655\071655
+
     QDateTime current_date_time =QDateTime::currentDateTimeUtc();
     current_date_d =current_date_time.toString("yyyyMMdd");
     current_date_t2 =current_date_time.toString("hhmmss");
-    if(savefits && !fulldisk)
+    if(savefits && !diskfull  )
     {
         if(fpre=="T" && localsave && !localfirst)
         {
@@ -186,18 +190,31 @@ void aCCD::getData()
         if(fpre=="FLAT")
         {
             //QString fcnt = QString("%1").arg(flatcnt, 2, 10, QLatin1Char('0'));
-            saveDir=savepref;
+            //QString fcnt = current_date_t2;
+            saveDir=savepref+current_date_t1;
+            QDir *fdir = new QDir(saveDir);
+            QDir tmpdir(saveDir);
+            QStringList filter;
+            filter<<"*.fits";
+            fdir->setNameFilters(filter);
+            QFileInfoList fileInfoList=fdir->entryInfoList(filter);
+            if(fserialNo == 0 && tmpdir.exists(saveDir) && fileInfoList.count() != datanum)
+            {               
+                tmpdir.removeRecursively();
+            }
+
+            if(fileInfoList.count() == datanum  && display)
+                emit stop_Acq();
 
             if(!sdir.exists(saveDir))
               sdir.mkpath(saveDir);
+
+            delete fdir;
         }
 
     }
     qDebug()<<"Saving Pre: "<<savepred<<" "<<savepref<<" "<<savepre;
     qDebug()<<"Saving Dir: "<<saveDir;
-
-    QMutex fitslock;
-    fitslock.lock();
 
     AT_Command(handle, L"AcquisitionStart");
     int saveStatus;
@@ -205,38 +222,44 @@ void aCCD::getData()
     {
         t1=QDateTime::currentDateTime();
         lt1=t1.toSecsSinceEpoch();  //获取当前时间戳
-        //localfirst=false;
     }
+
     for (int i=0; i < NumberOfFrames; i++) {
+        //if btnSanp pressed during readout loop, break it to restart
         if(localfirst)
         {
             break;
         }
+
          AT_WaitBuffer(handle, &buffer, &BufSize, AT_INFINITE);
          //Application specific data processing goes here..
          AT_WC pixelEncoding[255] = {0};
          int pixelEncodingIndex;
          AT_GetEnumIndex(handle, L"PixelEncoding", &pixelEncodingIndex);
          AT_GetEnumStringByIndex(handle, L"PixelEncoding", pixelEncodingIndex, pixelEncoding, 255);
-         //AT_Flush(handle);
-         //AT_Command(handle, L"AcquisitionStart");
-         //AT_InitialiseUtilityLibrary();
-         AT_ConvertBuffer(buffer, reinterpret_cast<unsigned char *>(unpackedBuffer), imgW, imgH, imgStride, pixelEncoding, L"Mono16");
-         //AT_FinaliseUtilityLibrary();
-         if(NULL != unpackedBufferback && display)
-            emit buf_Ready(unpackedBufferback,len);
-         //qDebug()<<"Saving : "<<QString::number(fserialNo);
-         //saveStatus=0;
 
-         if(savefits && i >= 1 && !fulldisk ){
-           if(fpre=="T" && localsave)
-            saveStatus=saveData(saveDir,unpackedBufferback);
-           else
-            saveStatus=saveData(saveDir,unpackedBufferback);
+         AT_ConvertBuffer(buffer, reinterpret_cast<unsigned char *>(unpackedBuffer), imgW, imgH, imgStride, pixelEncoding, L"Mono16");
+
+         //qDebug()<<"Saving : "<<QString::number(fserialNo);
+         saveStatus=1;
+         if(savefits && i >= 1 && !diskfull ){
+           if(fpre=="T")
+           {
+               if(localsave && !localfirst)
+               {
+                    saveStatus=saveData(saveDir,unpackedBufferback);
+               }
+           }
+           else{
+                   if(fpre=="FLAT" || fpre=="dark")
+                   {
+                        saveStatus=saveData(saveDir,unpackedBufferback);
+                   }
+           }
            if(saveStatus==0)
            {
-               serialNo=(serialNo+1) % frameRate;
-               fserialNo=fserialNo+1;
+               serialNo=(serialNo+1) % frameRate; //single cycle
+               fserialNo=fserialNo+1; //total number
                qDebug()<<"Saving : "<<saveDir<<" "<<QString::number(fserialNo);
                if(!continousACQ){
                    if( fpre=="T" && (fserialNo - datanum)==0 && fserialNo>0)
@@ -245,21 +268,30 @@ void aCCD::getData()
                        break;
                    }
                }
-               //if((fpre=="FLAT" && (fserialNo % 2000)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % 1000)==0 && fserialNo>0))
                if((fpre=="FLAT" && (fserialNo - datanum)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo - datanum)==0 && fserialNo>0))
                {
                    emit stop_Acq();
                    break;
                }
            }//end of savestatus
+
          }//end of savefits
+
+
+        if(live && !display_locked && display)
+            emit buf_Ready(unpackedBufferback,buflen);
+
+        histfirst=false;
+
          //Re-queue the buffers
          AT_QueueBuffer(handle, AlignedBuffers[i%NumberOfBuffers], bufferSize);
+         //if btnSanp pressed during readout loop, break it to restart
          if(localfirst)
          {
              break;
          }
-         if(!localsave && fpre=="T" && !localfirst)
+         //if not localsave--->break and start new acq
+         if(!localsave && fpre=="T" && savefits && !localfirst)
          {
              t2=QDateTime::currentDateTime();
              lt2=t2.toSecsSinceEpoch();  //获取当前时间戳
@@ -271,7 +303,10 @@ void aCCD::getData()
              }
 
          }
-        }//end of num. of frames
+
+        }//end of num. of frames,for loop
+
+
     if(localsave && !localfirst && fpre=="T")
     {
         t2=QDateTime::currentDateTime();
@@ -284,16 +319,14 @@ void aCCD::getData()
         else
         {
             localsave=false;
-            //wait_Acq=true;
-            //lt1=lt2;
-            //emit pause_Acq(dt);
         }
     }
+    if(localfirst)
+        localfirst=false;
     //Stop the acquisition
     AT_Command(handle, L"AcquisitionStop");
     AT_Flush(handle);
-    fitslock.unlock();
-    //Application specific data processing goes here..
+
     //Free the allocated buffer
     for (int i=0; i < NumberOfBuffers; i++) {
      delete[] AcqBuffers[i];
@@ -303,34 +336,31 @@ void aCCD::getData()
     //AlignedBuffers=NULL;
     delete[] AcqBuffers;
     //AcqBuffers=NULL;
+
     delete[] unpackedBufferback;
+    //delete[] unpackedBufferback01;
     delete[] bufferback;
+
     //saveDir="";
     if(freedisk<=3)
     {
-        fulldisk=true;
+        diskfull=true;
         savefits=false;
         emit stop_Acq();
         //break;
     }else
-        fulldisk=false;
-    //AT_Close(handle);
-    //AT_FinaliseLibrary();
-    if(localfirst)
-        localfirst=false;
+        diskfull=false;
+    //fitslock.unlock();
+    //savefits_locked=false;
+
 }
 
 int aCCD::saveData(QString savePath,unsigned short* buff)
 {
     QString fstr;
-    //QDir dir;
-    //if(!dir.exists(savePath))
-        //dir.mkpath(savePath);
-    //imgMax=*std::max_element(buff,buff+sizeof(buff)/sizeof(buff[0]));
-    //qDebug("%s",savePath.toLatin1().data());
+
     int status = 0; /* initialize status before calling fitsio routines 0-ok 1-failed*/
-    //QDateTime current_date_time =QDateTime::currentDateTime();
-    //QString current_date =current_date_time.toString("yyyyMMdd-hhmmsszzz");
+
     if(fpre=="FLAT" || fpre=="dark")
         fstr = QString("%1").arg(fserialNo, 6, 10, QLatin1Char('0'));
     else
@@ -400,10 +430,6 @@ int aCCD::saveData(QString savePath,unsigned short* buff)
         int ybin=1;
         fits_update_key(fptr, TINT, "XBINING", &xbin,"Binning factor in width",&status);
         fits_update_key(fptr, TINT, "YBINING", &ybin,"Binning factor in height",&status);
-        int w=imgW;
-        int h=imgH;
-        fits_update_key(fptr, TINT, "IMGWIDTH", &w,"Original Image Width",&status);
-        fits_update_key(fptr, TINT, "IMGHEIGH", &h,"Original Image height",&status);
         nelements = imgW*imgH; /* number of pixels to write */
         /* Write the array of integers to the image */
         fits_write_img(fptr, TUSHORT, fpixel, nelements, buff, &status);
@@ -421,11 +447,6 @@ int aCCD::saveData(QString savePath,unsigned short* buff)
         //qDebug("create %s file failed! %d",fitsname,status);
         status=1;
     }
-    //AT_GetInt(handle,L"AccumulateCount",&f1);
-    //serialNo++;
-    //if(status==0)
-       //serialNo=serialNo+1;
-    //sleep(1);
 
     return status;
 }
