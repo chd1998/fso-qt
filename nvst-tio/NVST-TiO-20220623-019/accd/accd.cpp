@@ -171,18 +171,22 @@ void aCCD::getData()
     QDateTime current_date_time =QDateTime::currentDateTimeUtc();
     current_date_d =current_date_time.toString("yyyyMMdd");
     current_date_t2 =current_date_time.toString("hhmmss");
+    if(localfirst)
+    {
+        current_date_t1=current_date_t2;
+    }
     if(savefits && !diskfull  )
     {
         if(fpre=="T" && localsave && !localfirst)
         {
-            saveDir=savepre+"\\"+current_date_t2+"\\"+current_date_t2;
+            saveDir=savepre+"\\"+current_date_t1+"\\"+current_date_t2;
             if(!sdir.exists(saveDir))
                 sdir.mkpath(saveDir);
         }
         if(fpre=="dark")
         {
             //saveDir=savepre+"\\"+current_date_t;
-            saveDir=savepred;
+            saveDir=savepred+"\\"+current_date_t2+"\\"+current_date_t2;
             if(!sdir.exists(saveDir))
                 sdir.mkpath(saveDir);
             //acqcnt=1000;
