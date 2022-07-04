@@ -838,7 +838,8 @@ void MainWindow::on_btnSnap_pressed() {
         //QDir tmpdir;
         savepred=saveTo+current_date_d+"\\TIO\\dark\\"+current_date_t1+"\\"+current_date_t1;
         savepref=saveTo+current_date_d+"\\TIO\\FLAT";
-        savepre=saveTo+current_date_d+"\\TIO\\"+ui->lineEdit_objname->text()+"\\"+current_date_t1;
+        //savepre=saveTo+current_date_d+"\\TIO\\"+ui->lineEdit_objname->text()+"\\"+current_date_t1;
+        savepre=saveTo+current_date_d+"\\TIO\\"+ui->lineEdit_objname->text();
         if(fpre=="T")
         {
             saveDir=savepre;

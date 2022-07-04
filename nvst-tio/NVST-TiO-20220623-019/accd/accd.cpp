@@ -175,7 +175,7 @@ void aCCD::getData()
     {
         if(fpre=="T" && localsave && !localfirst)
         {
-            saveDir=savepre+"\\"+current_date_t2;
+            saveDir=savepre+"\\"+current_date_t2+"\\"+current_date_t2;
             if(!sdir.exists(saveDir))
                 sdir.mkpath(saveDir);
         }
