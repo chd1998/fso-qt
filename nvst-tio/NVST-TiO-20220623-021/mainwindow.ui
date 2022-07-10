@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>937</width>
+    <height>801</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="toolTip">
+   <string/>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>50</y>
+      <width>591</width>
+      <height>512</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>1</horstretch>
+      <verstretch>1</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>512</width>
+      <height>512</height>
+     </size>
+    </property>
+    <property name="cursor" stdset="0">
+     <cursorShape>CrossCursor</cursorShape>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustIgnored</enum>
+    </property>
+    <property name="backgroundBrush">
+     <brush brushstyle="SolidPattern">
+      <color alpha="255">
+       <red>0</red>
+       <green>0</green>
+       <blue>0</blue>
+      </color>
+     </brush>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLive">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Start Live</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_time">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>10</y>
+      <width>591</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Panel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <property name="lineWidth">
+     <number>2</number>
+    </property>
+    <property name="text">
+     <string>Current Time</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnSnap">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>380</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Start Acquisition</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+    <property name="autoRepeatDelay">
+     <number>50</number>
+    </property>
+    <property name="autoRepeatInterval">
+     <number>50</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_status">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>420</y>
+      <width>331</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Log (Andor Neo for NVST - TiO 7058A)</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit_status">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>440</y>
+      <width>321</width>
+      <height>301</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+   </widget>
+   <widget class="QChartView" name="chart_graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>570</y>
+      <width>591</width>
+      <height>171</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>321</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="title">
+     <string>Data Options</string>
+    </property>
+    <widget class="QLineEdit" name="lineEdit_cor2">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>140</y>
+       <width>111</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>E00</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_cor1">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>140</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>N00</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_flatnum">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>20</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>2000</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Coordinate</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_objname">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>110</y>
+       <width>231</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sun</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_obj">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Obs. Object</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_dunit_2">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>20</y>
+       <width>171</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="text">
+      <string>Frames(0-nonStop)</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_darknum">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>50</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1000</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_Flat">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>71</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>FLAT</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_Data">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>71</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Data</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_datanum">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>80</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_Dark">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>dark</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>321</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="title">
+     <string>Save Options</string>
+    </property>
+    <widget class="QLabel" name="label_freedisk">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>20</y>
+       <width>171</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="text">
+      <string>Free Space  </string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_savelog">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>50</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>d:\log</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_savelog">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>50</y>
+       <width>31</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Log</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_saveto">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>20</y>
+       <width>31</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Data </string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_saveto">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>e:\</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_dunit_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>31</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>321</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="title">
+     <string>Camera Options</string>
+    </property>
+    <widget class="QLabel" name="label_dunit_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>51</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Acquire</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_dunit_5">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>20</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ms</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_exposuretime">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>20</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1.2</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_framerate">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>50</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>200</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>50</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Frarmes/Group (Max 200)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_exposuretime">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Exposure</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_groupdelay">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>80</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>30</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>80</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Secs/Group( 20~60 secs)</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>937</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuServer">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionServer"/>
+    <addaction name="actionDetect_Cameras"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuServer"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionServer">
+   <property name="text">
+    <string>Server</string>
+   </property>
+  </action>
+  <action name="actionLogging">
+   <property name="text">
+    <string>Logging</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionDetect_Cameras">
+   <property name="text">
+    <string>Detect Cameras</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header location="global">QtCharts</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
