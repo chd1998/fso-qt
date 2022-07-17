@@ -19,7 +19,7 @@ class threadB : public QObject
 public:
     threadB();
     QString src;
-    int countB;
+    //int countB;
     QVector<unsigned short>vechistdata;
     void working();
     void calcHist();
@@ -28,7 +28,7 @@ public:
 
 signals:
     void fromB(QString,int);
-    void histReady(QVector<unsigned short>,int,int);
+    void histReady(QVector<uint>,uint,uint);
     void finished(QString);
 
 

@@ -1,20 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,Alocked=false,Blocked=false;
-QMutex lockA,lockB,imglock,histlock;
+bool pausedA=false,pausedB=false,stoppedA=false,stoppedB=false,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,Alocked=false,Blocked=false,calchist_locked=false;
+QMutex lockA,lockB,imglock,histlock,calchistlock;
 QImage *grayimage,*grayimage16;
 int imgX0=1024,imgY0=1024,imgX,imgY,frameRate=33,histRate=200,low=20000,high=42000;
-QVector<unsigned short>vechistdata(65536,0);
-int histmax=0,histindex=32768;
+QVector<uint>vechistdata(65536,0);
+uint histmax=0,histindex=32768;
 //QBarSet *set = nullptr;
 QLineSeries *lineseries = nullptr;
 QAreaSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-unsigned short *myImage=nullptr,*myImageBack=nullptr,*srcimg=nullptr;
-uint MAXQUEUE=100;
+unsigned short *srcimg=nullptr;
+uint MAXQUEUE=100,countA=0,countB=0;
 moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -100,10 +100,12 @@ void MainWindow::updateStatus(QString src,int count)
     if(src == "A")
     {
         ui->textEdit_StatusA->append(src+": count="+QString::number(count));
+        ui->textEdit_StatusA->append("Size of Image Queue: "+QString::number(imgQueue.size_approx()));
     }
     if(src == "B")
     {
         ui->textEdit_StatusB->append(src+": count="+QString::number(count)+" Max="+QString::number(histmax)+" idx="+QString::number(histindex));
+        ui->textEdit_StatusB->append("Size of Image Queue: "+QString::number(imgQueue.size_approx()));
     }
 }
 
@@ -419,8 +421,10 @@ void MainWindow::updateImg()
             //ui->imgView->resize(521,421);
             //ui->graphicsView->fitInView(scene->sceneRect(),Qt::IgnoreAspectRatio);
             ui->imgView->update();
+
             //delete item;
         }
+        countA++;
     }
 
     delete grayimage16;
@@ -435,10 +439,8 @@ void MainWindow::updateImg()
     //imglocked = false;
 }
 
-void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,int tmphistindex)
+void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphistindex)
 {
-
-
     histlock.lock();
     histlocked=true;
     if(startedA && (startedB && !pausedB) )
@@ -487,6 +489,7 @@ void MainWindow::updateHist(QVector<unsigned short> tmphistdata,int tmphistmax,i
 
         ui->hist_chartview->setVisible(true);
         ui->hist_chartview->update();
+        countB++;
     }
 
     histlock.unlock();

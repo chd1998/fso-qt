@@ -6,6 +6,9 @@ threadA::threadA()
 {
     countA=0;
     src="A";
+    //std::default_random_engine gen;
+    //double mu{32768}, sigma{9000};
+    //std::normal_distribution<> d{mu, sigma};
 
 }
 
@@ -27,12 +30,10 @@ void threadA::working()
         //syncAB=false;
         for(int i = 0 ;i < imgX*imgY ;i++)
         {
-
-                //myImage[j+i*row]=(unsigned short)QRandomGenerator::global()->bounded(0,65535);
                 int randnum=QRandomGenerator::global()->bounded(low,high);
-                //myImage[i]=randnum;
-                //vecimg.append(randnum);
                 srcimg[i]=randnum;
+                //vecimg.append(randnum);
+                //srcimg[i]=(unsigned short)d(gen);
 
         }
         //syncAB=true;
@@ -47,7 +48,7 @@ void threadA::working()
         }*/
         //if(!imglocked || !histlocked)
 
-        countA++;
+        //countA++;
         lockA.unlock();
         Alocked=false;
         //qDebug()<<countA<<":"<<imgX<<" "<<imgY<<" "<<vecimg.size()<<" "<<sizeof(* myImage)/sizeof(myImage[0]);

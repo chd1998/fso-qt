@@ -12,22 +12,22 @@
 #include <QGraphicsScene>
 #include "concurrentqueue.h"
 
-extern  QMutex lockA,lockB,imglock,histlock;
-extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,Alocked,Blocked;
+extern  QMutex lockA,lockB,imglock,histlock,calchistlock;
+extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,Alocked,Blocked,calchist_locked;
 extern  int imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
 extern  QImage *grayimage,*grayimage16;
 //extern  int *histdata;
-extern QVector<unsigned short>vechistdata;
-extern int histmax,histindex;
+extern QVector<uint>vechistdata;
+extern uint histmax,histindex;
 //extern QBarSet *set ;
 extern QLineSeries *lineseries ;
 extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern unsigned short *myImage,*myImageBack,*srcimg;
+extern unsigned short *srcimg;
 extern moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
-extern uint MAXQUEUE;
+extern uint MAXQUEUE,countA,countB;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -66,7 +66,7 @@ private slots:
     void updateStatus(QString,int);
     //void updateImg(unsigned short *);
     void updateImg();
-    void updateHist(QVector<unsigned short>,int,int);
+    void updateHist(QVector<uint>,uint,uint);
     void pauseThread(QString);
     void on_btn_start_A_clicked();
     void on_btn_pause_A_clicked();

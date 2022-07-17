@@ -17,9 +17,11 @@ void threadB::working()
         lockB.lock();
         //Blocked=true;
         if(!stoppedB || !pausedB )
+        {
             emit fromB(src,countB);
-        if(!histlocked)
+        //if(!calchist_locked)
            calcHist();
+        }
 
         /*if(imgQueue.size_approx() > MAXQUEUE){
             //imgQueueFull=true;
@@ -28,7 +30,7 @@ void threadB::working()
 
         if(countB != 0)
             histfirst = false;
-        countB++;
+        //countB++;
 
         lockB.unlock();
         //Blocked=false;
@@ -47,9 +49,11 @@ void threadB::working()
 }
 void threadB::calcHist()
 {
+    calchistlock.lock();
+    calchist_locked=true;
     if(imgQueue.try_dequeue(srcimg))
     {
-        QVector<unsigned short>vechistdata(65536,0);
+        QVector<uint>vechistdata(65536,0);
         //vechistdata.clear();
         histmax=0;
         if(startedA)
@@ -72,11 +76,14 @@ void threadB::calcHist()
         //std::sort(std::execution::par_unseq, vechistdata.begin(), vechistdata.end());
         //qDebug()<<"idx="<<histindex<<" Value="<<vechistdata.at(histindex);
 
-        if( !Alocked)
+        //if( !Alocked && !histlocked)
+        if( !Alocked )
             emit histReady(vechistdata,histmax,histindex);
-        QVector<unsigned short> nullvec;
+        QVector<uint> nullvec;
         vechistdata.swap(nullvec);
     }
+    calchistlock.unlock();
+    calchist_locked=false;
 
 }
 //void threadB::finished()
