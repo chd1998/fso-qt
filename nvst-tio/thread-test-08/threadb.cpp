@@ -49,8 +49,8 @@ void threadB::working()
 }
 void threadB::calcHist()
 {
-    calchistlock.lock();
-    calchist_locked=true;
+    //calchistlock.lock();
+    //calchist_locked=true;
     if(imgQueue.try_dequeue(srcimg))
     {
         QVector<uint>vechistdata(65536,0);
@@ -77,13 +77,13 @@ void threadB::calcHist()
         //qDebug()<<"idx="<<histindex<<" Value="<<vechistdata.at(histindex);
 
         //if( !Alocked && !histlocked)
-        if( !Alocked )
-            emit histReady(vechistdata,histmax,histindex);
+        //if( !histlocked )
+        emit histReady(vechistdata,histmax,histindex);
         QVector<uint> nullvec;
         vechistdata.swap(nullvec);
     }
-    calchistlock.unlock();
-    calchist_locked=false;
+    //calchistlock.unlock();
+    //calchist_locked=false;
 
 }
 //void threadB::finished()

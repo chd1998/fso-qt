@@ -36,11 +36,12 @@ void threadA::working()
                 //srcimg[i]=(unsigned short)d(gen);
 
         }
-        //syncAB=true;
+        countA1++;//syncAB=true;
         if(!stoppedA || !pausedA)
         {
-            emit fromA(src,countA);
             imgQueue.enqueue(srcimg);
+            emit fromA(src,countA);
+            //imgQueue.enqueue(srcimg);
         }
         /*if(!imglocked || !histlocked)
         {

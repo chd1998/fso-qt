@@ -14,7 +14,7 @@ QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
 unsigned short *srcimg=nullptr;
-uint MAXQUEUE=100,countA=0,countB=0;
+uint MAXQUEUE=100,countA=0,countA1=0,countB=0;
 moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -99,12 +99,12 @@ void MainWindow::updateStatus(QString src,int count)
 
     if(src == "A")
     {
-        ui->textEdit_StatusA->append(src+": count="+QString::number(count));
+        ui->textEdit_StatusA->append(src+": display="+QString::number(count)+" - enqueue="+QString::number(countA1));
         ui->textEdit_StatusA->append("Size of Image Queue: "+QString::number(imgQueue.size_approx()));
     }
     if(src == "B")
     {
-        ui->textEdit_StatusB->append(src+": count="+QString::number(count)+" Max="+QString::number(histmax)+" idx="+QString::number(histindex));
+        ui->textEdit_StatusB->append(src+": histcalc="+QString::number(count)+" histmax="+QString::number(histmax)+" histidx="+QString::number(histindex));
         ui->textEdit_StatusB->append("Size of Image Queue: "+QString::number(imgQueue.size_approx()));
     }
 }
@@ -391,7 +391,7 @@ void MainWindow::closeP()
 
 void MainWindow::updateImg()
 {
-    imglock.lock();
+    //imglock.lock();
     //imglocked = true;
     //if(grayimage16)
     //{
@@ -429,7 +429,7 @@ void MainWindow::updateImg()
 
     delete grayimage16;
     //delete[] myImage;
-    imglock.unlock();
+    //imglock.unlock();
     if(imgQueue.size_approx() > MAXQUEUE){
         //imgQueueFull=true;
         imgQueue=moodycamel::ConcurrentQueue<unsigned short*>();
@@ -441,8 +441,8 @@ void MainWindow::updateImg()
 
 void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphistindex)
 {
-    histlock.lock();
-    histlocked=true;
+    //histlock.lock();
+    //histlocked=true;
     if(startedA && (startedB && !pausedB) )
     {
         chart->removeSeries(series);
@@ -492,8 +492,8 @@ void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphi
         countB++;
     }
 
-    histlock.unlock();
-    histlocked=false;
+    //histlock.unlock();
+    //histlocked=false;
 
 }
 

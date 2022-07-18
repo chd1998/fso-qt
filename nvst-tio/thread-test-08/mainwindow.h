@@ -27,7 +27,7 @@ extern QValueAxis *axisY ;
 extern QChart *chart;
 extern unsigned short *srcimg;
 extern moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
-extern uint MAXQUEUE,countA,countB;
+extern uint MAXQUEUE,countA,countA1,countB;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
