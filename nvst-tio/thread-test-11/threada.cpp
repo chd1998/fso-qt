@@ -11,12 +11,13 @@ threadA::threadA()
     //std::normal_distribution<> d{mu, sigma};
     //if(srcimg != NULL)
         //delete srcimg;
-    srcimg=new unsigned short[imgX*imgY]();
+
 
 }
 
 void threadA::working()
 {
+    srcimg=new unsigned short[imgX*imgY]();
     while(!QThread::currentThread()->isInterruptionRequested())
     {
         QElapsedTimer t;
@@ -27,7 +28,7 @@ void threadA::working()
 
 
 
-        if(!pausedA && startedA)
+        if(!pausedA && !stoppedA && startedA)
         {
             for(uint i = 0 ;i < imgX*imgY ;i++)
             {

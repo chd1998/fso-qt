@@ -9,11 +9,12 @@ threadB::threadB()
     src="B";
     //if(destimg != NULL)
         //delete destimg;
-    destimg=new unsigned short[imgX*imgY];
+
 }
 
 void threadB::working()
 {
+    destimg=new unsigned short[imgX*imgY];
     while(!QThread::currentThread()->isInterruptionRequested())
     {
         QElapsedTimer t;
@@ -22,7 +23,7 @@ void threadB::working()
         //Blocked=true;
 
         uint imglen=imgX*imgY;
-         if(!pausedB && startedB && !pausedA && startedA)
+         if(!pausedB && !stoppedB && startedB && !pausedA && !stoppedA && startedA)
          {
             if(imgQueue.try_dequeue(destimg))
             {

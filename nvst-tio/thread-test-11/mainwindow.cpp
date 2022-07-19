@@ -217,6 +217,9 @@ void MainWindow::on_btn_start_A_clicked()
 
     }else{
         ui->textEdit_StatusA->append("ThreadA start failed...");
+        startedA=false;
+        pausedA=false;
+        stoppedA=true;
     }
 
 }
@@ -239,7 +242,7 @@ void MainWindow::on_btn_resume_A_clicked()
     ui->btn_pause_A->setEnabled(true);
     ui->btn_resume_A->setEnabled(false);
     ui->textEdit_StatusA->append("ThreadA resumed...");
-    stoppedA=false;
+    pausedA=false;
     lockA.unlock();
 }
 
@@ -271,6 +274,11 @@ void MainWindow::on_btn_stopA_pressed()
         startedA=false;
         pausedA=false;
         stoppedA=true;
+    }else
+    {
+        startedA=true;
+        pausedA=false;
+        stoppedA=false;
     }
 
  }
@@ -309,6 +317,9 @@ void MainWindow::on_btn_start_B_clicked()
         pausedB=false;
     }else{
         ui->textEdit_StatusB->append("ThreadB start failed...");
+        startedB=false;
+        stoppedB=true;
+        pausedB=false;
     }
 }
 
@@ -360,8 +371,12 @@ void MainWindow::on_btn_stopB_pressed()
         startedB=false;
         pausedB=false;
         stoppedB=true;
-
+    }else{
+        startedB=true;
+        pausedB=false;
+        stoppedB=false;
     }
+
 
 }
 
@@ -416,6 +431,10 @@ void MainWindow::closeP()
             QCoreApplication::processEvents();
         }
     }
+    pausedA=false;
+    pausedB=false;
+    startedA=false;
+    startedB=false;
 }
 
 void MainWindow::updateImg()
@@ -425,11 +444,13 @@ void MainWindow::updateImg()
     //QElapsedTimer t;
     //t.start();
 
-    grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
 
-    if(imgQueue.try_dequeue(destimg))
+
+
+    if(!pausedA  && startedA && !stoppedA )
     {
-        if(!pausedA  && startedA  )
+        grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+        if(imgQueue.try_dequeue(destimg))
         {
             *grayimage16 = QImage(reinterpret_cast< uchar* >( destimg ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
             imgscene->clear();
@@ -441,14 +462,16 @@ void MainWindow::updateImg()
             ui->imgView->update();
 
             //delete item;
+        }else
+        {
+            ui->textEdit_StatusA->append("Image dequeue in display failed, pls wait...");
         }
         countA++;
-    }else
-    {
-        ui->textEdit_StatusA->append("Image dequeue in display failed, pls wait...");
+        fps1++;
+        delete grayimage16;
     }
-    fps1++;
-    delete grayimage16;
+
+
 
     //imglock.unlock();
     //imglocked = false;
