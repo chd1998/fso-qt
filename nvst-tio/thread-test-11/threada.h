@@ -21,13 +21,14 @@ public:
     std::random_device rd{};
     std::mt19937 gen{};
     std::normal_distribution<> d;
+    //unsigned short* srcimg;
 
     void working();
 
 
 signals:
-    void fromA(QString,int);
-    //void imgReady(unsigned s);
+    void fromA(QString,int,QString);
+    //void imgReady();
     void finished(QString);
 
 };

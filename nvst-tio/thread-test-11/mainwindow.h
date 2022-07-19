@@ -14,7 +14,7 @@
 
 extern  QMutex lockA,lockB,imglock,histlock,calchistlock;
 extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,Alocked,Blocked,calchist_locked;
-extern  int imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
+extern  uint imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
 extern  QImage *grayimage,*grayimage16;
 //extern  int *histdata;
 extern QVector<uint>vechistdata;
@@ -25,9 +25,9 @@ extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern unsigned short *srcimg;
+extern unsigned short *srcimg,*destimg;
 extern moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
-extern uint MAXQUEUE,countA,countA1,countB;
+extern uint MAXQUEUE,countA,countA1,countB,countB1;
 extern long t0,t1;
 extern long dt;
 extern uint fps0,fps1,fps;
@@ -66,7 +66,7 @@ private:
     Ui::MainWindow *ui;
 
 private slots:
-    void updateStatus(QString,int);
+    void updateStatus(QString,int,QString);
     //void updateImg(unsigned short *);
     void updateImg();
     void updateHist(QVector<uint>,uint,uint);

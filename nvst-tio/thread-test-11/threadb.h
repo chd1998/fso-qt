@@ -23,11 +23,12 @@ public:
     QVector<unsigned short>vechistdata;
     void working();
     void calcHist();
+    //unsigned short* destimg;
 
     //bool histfinished;
 
 signals:
-    void fromB(QString,int);
+    void fromB(QString,int,QString);
     void histReady(QVector<uint>,uint,uint);
     void finished(QString);
 

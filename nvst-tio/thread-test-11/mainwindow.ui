@@ -173,7 +173,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>100</string>
+      <string>50</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_low">
