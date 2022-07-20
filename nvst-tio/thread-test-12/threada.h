@@ -26,10 +26,12 @@ public:
     void working();
 
 
+
 signals:
     void fromA(QString,int,QString);
+    //void finished();
     //void imgReady();
-    void finished(QString);
+
 
 };
 

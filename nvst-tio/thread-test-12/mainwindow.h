@@ -12,10 +12,11 @@
 #include <QGraphicsScene>
 #include "concurrentqueue.h"
 
-extern  QMutex lockA,lockB,imglock,histlock,calchistlock;
-extern  bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB,imglocked,histlocked,histfirst,Alocked,Blocked,calchist_locked;
-extern  uint imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
-extern  QImage *grayimage,*grayimage16;
+extern QMutex lockA,lockB;
+extern QWaitCondition pauseCondA,pauseCondB;
+extern bool pausedA,pausedB,stoppedA,stoppedB,startedA,startedB;
+extern uint imgX,imgX0,imgY,imgY0,frameRate,histRate,low,high;
+extern QImage *grayimage,*grayimage16;
 //extern  int *histdata;
 extern QVector<uint>vechistdata;
 extern uint histmax,histindex;
@@ -25,7 +26,7 @@ extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-extern unsigned short *srcimg,*destimg;
+extern unsigned short *srcimg,*destimg,*destimg1;
 extern moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 extern uint MAXQUEUE,countA,countA1,countB,countB1;
 extern long t0,t1;
@@ -78,8 +79,10 @@ private slots:
     void on_btn_pause_B_clicked();
     void on_btn_resume_B_clicked();
     void on_btn_exit_clicked();
-    void on_btn_stopA_pressed();
-    void on_btn_stopB_pressed();
+    void on_btn_stopA_clicked();
+    //void on_btn_stopB_pressed();
     void onesecPassed();
+    void on_btn_stopB_clicked();
+    //void finishB();
 };
 #endif // MAINWINDOW_H

@@ -18,11 +18,13 @@ class threadB : public QObject
     Q_OBJECT
 public:
     threadB();
+    ~threadB();
     QString src;
     //int countB;
     QVector<unsigned short>vechistdata;
     void working();
     void calcHist();
+    //void finished();
     //unsigned short* destimg;
 
     //bool histfinished;
@@ -30,7 +32,7 @@ public:
 signals:
     void fromB(QString,int,QString);
     void histReady(QVector<uint>,uint,uint);
-    void finished(QString);
+    //void finished();
 
 
 //public slots:

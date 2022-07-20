@@ -1,8 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-bool pausedA=false,pausedB=false,stoppedA=true,stoppedB=true,startedA=false,startedB=false,imglocked=false,histlocked=false,histfirst=true,Alocked=false,Blocked=false,calchist_locked=false;
-QMutex lockA,lockB,imglock,histlock,calchistlock;
+bool pausedA=false,pausedB=false,stoppedA=true,stoppedB=true,startedA=false,startedB=false;
+QMutex lockA,lockB;
+QWaitCondition pauseCondA,pauseCondB;
 QImage *grayimage,*grayimage16;
 uint imgX0=1024,imgY0=1024,imgX,imgY,frameRate=33,histRate=200,low=20000,high=42000;
 QVector<uint>vechistdata(65536,0);
@@ -13,7 +14,7 @@ QAreaSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-unsigned short *destimg=nullptr,*srcimg=nullptr;
+unsigned short *destimg=nullptr,*srcimg=nullptr,*destimg1=nullptr;
 uint MAXQUEUE=100,countA=0,countA1=0,countB=0,countB1=0;
 moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 uint fps0=0,fps1=0,fps=0;
@@ -102,6 +103,10 @@ MainWindow::MainWindow(QWidget *parent)
     onesecTimer->setTimerType(Qt::PreciseTimer);
     connect(onesecTimer, &QTimer::timeout, this, &MainWindow::onesecPassed);
     onesecTimer->start(1000);
+
+    liveTimer = new QTimer(this);
+    liveTimer->setTimerType(Qt::PreciseTimer);
+    connect(liveTimer, &QTimer::timeout, this, &MainWindow::updateImg);
 }
 
 void MainWindow::onesecPassed()
@@ -169,8 +174,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::on_btn_start_A_clicked()
 {
+
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
+    destimg=new unsigned short[imgX*imgY];
     //if(srcimg != NULL)
     //    delete[] srcimg;
     //srcimg=new unsigned short[imgX*imgY];
@@ -194,14 +201,12 @@ void MainWindow::on_btn_start_A_clicked()
     taskA->moveToThread(thread1);
     connect(thread1, &QThread::started, taskA, &threadA::working);
     connect(taskA,&threadA::fromA,this, &MainWindow::updateStatus);
-    connect(taskA, &threadA::finished, thread1, &QThread::requestInterruption,Qt::DirectConnection);
-    connect(taskA, &threadA::finished, this, &MainWindow::pauseThread,Qt::DirectConnection);
-    connect(thread1, &QThread::finished, thread1, &QThread::deleteLater);
+    //connect(taskA, &threadA::finished, thread1, &QThread::requestInterruption,Qt::DirectConnection);
+    //connect(taskA, &threadA::finished, this, &MainWindow::pauseThread,Qt::DirectConnection);
+    connect(thread1, &QThread::finished, thread1, &QObject::deleteLater);
     //connect(taskA, &threadA::imgReady, this, &MainWindow::updateImg);
-    liveTimer = new QTimer(this);
-    liveTimer->setTimerType(Qt::PreciseTimer);
-    connect(liveTimer, &QTimer::timeout, this, &MainWindow::updateImg);
-    liveTimer->start(frameRate*2);
+
+    liveTimer->start(frameRate);
 
     thread1->start();
     if(thread1->isRunning())
@@ -231,8 +236,9 @@ void MainWindow::on_btn_pause_A_clicked()
     ui->btn_pause_A->setEnabled(false);
     ui->btn_resume_A->setEnabled(true);
     ui->textEdit_StatusA->append("ThreadA paused...");
-    pausedA=true;
     lockA.lock();
+    pausedA=true;
+    lockA.unlock();
 }
 
 
@@ -242,143 +248,160 @@ void MainWindow::on_btn_resume_A_clicked()
     ui->btn_pause_A->setEnabled(true);
     ui->btn_resume_A->setEnabled(false);
     ui->textEdit_StatusA->append("ThreadA resumed...");
+    lockA.lock();
     pausedA=false;
     lockA.unlock();
+    pauseCondA.wakeAll();
 }
 
-void MainWindow::on_btn_stopA_pressed()
+void MainWindow::on_btn_stopA_clicked()
 {
-    if(pausedA)
-        lockA.unlock();
-    if(thread1->isRunning())
-    {
-        thread1->disconnect();
-        thread1->quit();
-        thread1->requestInterruption();
-        thread1->wait();
-        while(thread1->isRunning() )
-        {
-            QCoreApplication::processEvents();
-            qDebug()<<"Waiting...";
-        }
-        thread1->deleteLater();
-    }
 
-    if(thread1->isFinished()){
-        stoppedA=true;
-        ui->textEdit_StatusA->append("ThreadA stopped...");
-        ui->btn_start_A->setEnabled(true);
-        ui->btn_pause_A->setEnabled(false);
-        ui->btn_resume_A->setEnabled(false);
-        ui->btn_stopA->setEnabled(false);
-        startedA=false;
-        pausedA=false;
-        stoppedA=true;
-    }else
-    {
-        startedA=true;
-        pausedA=false;
-        stoppedA=false;
-    }
+    stoppedA=true;
+    startedA=false;
+    ui->textEdit_StatusA->append("ThreadA stopped...");
+    ui->btn_start_A->setEnabled(true);
+    ui->btn_pause_A->setEnabled(false);
+    ui->btn_resume_A->setEnabled(false);
+    ui->btn_stopA->setEnabled(false);
 
+    liveTimer->stop();
+    thread1->disconnect();
+    thread1->quit();
+    //thread1->requestInterruption();
+    thread1->wait();
+    while(thread1->isRunning() )
+    {
+        QCoreApplication::processEvents();
+        qDebug()<<"Waiting for threadA to stop...";
+    }
+    thread1->deleteLater();
+    delete[] destimg;
+    imgQueue=moodycamel::ConcurrentQueue<unsigned short*>();
  }
 
 void MainWindow::on_btn_start_B_clicked()
 {
-    imgX=ui->lineEdit_imgx->text().toInt();
-    imgY=ui->lineEdit_imgy->text().toInt();
-    //if(destimg != NULL)
-    //    delete[] destimg;
-    //destimg=new unsigned short[imgX*imgY];
-    histRate=ui->lineEdit_histrate->text().toInt();
-    thread2 = new QThread( );
-    taskB = new threadB();
-    // move the task object to the thread BEFORE connecting any signal/slots
-    taskB->moveToThread(thread2);
-    connect(thread2, &QThread::started, taskB, &threadB::working);
-    connect(taskB,&threadB::fromB,this, &MainWindow::updateStatus);
-    connect(taskB,&threadB::histReady,this, &MainWindow::updateHist);
-    connect(taskB, &threadB::finished, thread2, &QThread::requestInterruption,Qt::DirectConnection);
-    connect(taskB, &threadB::finished, this, &MainWindow::pauseThread,Qt::DirectConnection);
-    connect(thread2, &QThread::finished, thread2, &QThread::deleteLater);
-    //if(startedA)
-        //connect(taskA,&threadA::imgReady,taskB, &threadB::calcHist);
-
-    thread2->start();
-    if(thread2->isRunning())
+    if(!stoppedA)
     {
-        ui->textEdit_StatusB->append("ThreadB started...");
-        ui->btn_start_B->setEnabled(false);
-        ui->btn_pause_B->setEnabled(true);
-        ui->btn_resume_B->setEnabled(false);
-        ui->btn_stopB->setEnabled(true);
         startedB=true;
         stoppedB=false;
         pausedB=false;
-    }else{
-        ui->textEdit_StatusB->append("ThreadB start failed...");
-        startedB=false;
-        stoppedB=true;
-        pausedB=false;
+        //imgX=ui->lineEdit_imgx->text().toInt();
+        //imgY=ui->lineEdit_imgy->text().toInt();
+        //if(destimg != NULL)
+        //    delete[] destimg;
+        //destimg=new unsigned short[imgX*imgY];
+        histRate=ui->lineEdit_histrate->text().toInt();
+        thread2 = new QThread( );
+        taskB = new threadB();
+        // move the task object to the thread BEFORE connecting any signal/slots
+        taskB->moveToThread(thread2);
+        connect(thread2, &QThread::started, taskB, &threadB::working);
+        connect(taskB,&threadB::fromB,this, &MainWindow::updateStatus);
+        //if(startedA)
+        connect(taskB,&threadB::histReady,this, &MainWindow::updateHist);
+        //connect(taskB, &threadB::finished, thread2, &QThread::requestInterruption);
+        //connect(taskB, &threadB::finished, this, &QThread::);
+        //connect(taskB, &threadB::finished, this, &MainWindow::finishB);
+        //if(startedB)
+            //connect(taskA,&threadA::imgReady,taskB, &threadB::calcHist);
+
+        thread2->start();
+        if(thread2->isRunning())
+        {
+            ui->textEdit_StatusB->append("ThreadB started...");
+            ui->btn_start_B->setEnabled(false);
+            ui->btn_pause_B->setEnabled(true);
+            ui->btn_resume_B->setEnabled(false);
+            ui->btn_stopB->setEnabled(true);
+
+        }else{
+            ui->textEdit_StatusB->append("ThreadB start failed...");
+            startedB=false;
+            stoppedB=true;
+            pausedB=false;
+        }
+    }else
+    {
+        ui->textEdit_StatusB->append("Pls start threadA first...");
     }
 }
 
 
 void MainWindow::on_btn_pause_B_clicked()
 {
+    lockB.lock();
+    pausedB=true;
+    lockB.unlock();
     ui->btn_pause_B->setEnabled(false);
     ui->btn_resume_B->setEnabled(true);
     ui->textEdit_StatusB->append("ThreadB paused...");
-    pausedB=true;
-    lockB.lock();
 }
 
 
 void MainWindow::on_btn_resume_B_clicked()
 {
-    ui->btn_pause_B->setEnabled(true);
-    ui->btn_resume_B->setEnabled(false);
-    ui->textEdit_StatusA->append("ThreadB resumed...");
+    lockB.lock();
     pausedB=false;
     lockB.unlock();
+    pauseCondB.wakeAll();
+    ui->btn_pause_B->setEnabled(true);
+    ui->btn_resume_B->setEnabled(false);
+    ui->textEdit_StatusB->append("ThreadB resumed...");
 }
 
-void MainWindow::on_btn_stopB_pressed()
+void MainWindow::on_btn_stopB_clicked()
 {
-    if(pausedB)
-        lockB.unlock();
-    if(thread2->isRunning())
+    stoppedB=true;
+    startedB=false;
+
+    ui->textEdit_StatusB->append("ThreadB stopped...");
+    ui->btn_start_B->setEnabled(true);
+    ui->btn_pause_B->setEnabled(false);
+    ui->btn_resume_B->setEnabled(false);
+    ui->btn_stopB->setEnabled(false);
+
+    //qDebug()<<"Enter finishB --- 01";
+    thread2->disconnect();
+    //qDebug()<<"Enter finishB --- 02";
+    thread2->quit();
+    //qDebug()<<"Enter finishB --- 03";
+    //thread2->requestInterruption();
+    thread2->wait();
+    //qDebug()<<"Enter finishB --- 04";
+    while(!thread2->isFinished())
     {
-        thread2->disconnect();
-        thread2->quit();
-        thread2->requestInterruption();
-        thread2->wait();
-        while(thread2->isRunning())
-        {
-            QCoreApplication::processEvents();
-            qDebug()<<"Waiting...";
-        }
-        thread2->deleteLater();
-
+        QCoreApplication::processEvents();
+        qDebug()<<"Waiting for threadB to stop...";
     }
-    if(thread2->isFinished()){
-        stoppedB=true;
-        ui->textEdit_StatusB->append("ThreadB stopped...");
-        ui->btn_start_B->setEnabled(true);
-        ui->btn_pause_B->setEnabled(false);
-        ui->btn_resume_B->setEnabled(false);
-        ui->btn_stopB->setEnabled(false);
-        startedB=false;
-        pausedB=false;
-        stoppedB=true;
-    }else{
-        startedB=true;
-        pausedB=false;
-        stoppedB=false;
-    }
-
-
+    //qDebug()<<"Enter finishB --- 05";
+    thread2->deleteLater();
+    //qDebug()<<"Enter finishB --- 06";
+    thread2=nullptr;
+    //qDebug()<<"Enter finishB --- 07";
 }
+
+/*void MainWindow::finishB()
+{
+    qDebug()<<"Enter finishB...";
+    //thread2->disconnect();
+    thread2->quit();
+    //thread2->requestInterruption();
+    thread2->wait();
+    while(thread2->isRunning())
+    {
+        QCoreApplication::processEvents();
+        qDebug()<<"Waiting for threadB to stop...";
+    }
+    thread2->deleteLater();
+    thread2=nullptr;
+}*/
+
+/*void MainWindow::on_btn_stopB_pressed()
+{
+
+}*/
 
 void MainWindow::on_btn_exit_clicked()
 {
@@ -439,101 +462,92 @@ void MainWindow::closeP()
 
 void MainWindow::updateImg()
 {
-    //imglock.lock();
-    //imglocked = true;
-    //QElapsedTimer t;
-    //t.start();
 
 
-
-
-    if(!pausedA  && startedA && !stoppedA )
-    {
-        grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
-        if(imgQueue.try_dequeue(destimg))
+        if(startedA && !pausedA)
         {
-            *grayimage16 = QImage(reinterpret_cast< uchar* >( destimg ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
-            imgscene->clear();
-            ui->imgView->update();
-            item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
-            imgscene->addItem(item);
-            imgscene->setSceneRect(QRectF(0, 0, imgY, imgX));
-            ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
-            ui->imgView->update();
-
-            //delete item;
-        }else
-        {
-            ui->textEdit_StatusA->append("Image dequeue in display failed, pls wait...");
+            grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+            //destimg1=new unsigned short[imgX*imgY];
+            if(imgQueue.try_dequeue(destimg))
+            {
+                *grayimage16 = QImage(reinterpret_cast< uchar* >( destimg ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
+                imgscene->clear();
+                ui->imgView->update();
+                item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
+                imgscene->addItem(item);
+                imgscene->setSceneRect(QRectF(0, 0, imgY, imgX));
+                ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
+                ui->imgView->update();
+            }else
+            {
+                ui->textEdit_StatusA->append("Image enqueue stopped, pls wait...");
+            }
+            countA++;
+            fps1++;
+            delete grayimage16;
+            //delete[] destimg1;
         }
-        countA++;
-        fps1++;
-        delete grayimage16;
-    }
 
-
-
-    //imglock.unlock();
-    //imglocked = false;
-    //while(t.elapsed()<frameRate)
-        //QCoreApplication::processEvents();
 }
 
 void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphistindex)
 {
     //histlock.lock();
     //histlocked=true;
-    if(startedB && !pausedB )
-    {
-        chart->removeSeries(series);
-        delete lineseries;
-        delete series;
-        lineseries=new QLineSeries();
 
-        for (int i=0;i<65536;++i) {
-           lineseries->append(QPointF(i,tmphistdata[i]));
-        }
-        lineseries->setColor(Qt::black);
+    chart->removeSeries(series);
+    delete lineseries;
+    delete series;
+    lineseries=new QLineSeries();
 
-        series = new QAreaSeries(lineseries);
-        series->setName("Histogram");
-        QPen pen(Qt::black);
-        pen.setWidth(1);
-        series->setPen(pen);
-        QBrush brush;
-        brush.setColor(Qt::black);//画刷颜色
-        brush.setStyle(Qt::SolidPattern);//画刷填充样式，斜网格
-        series->setBrush(brush);
-
-        chart->removeAxis(axisX);
-        delete axisX;
-        axisX = new QCategoryAxis();
-        axisX->setMin(0);
-        axisX->setMax(65535);
-        axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-        axisX->append(QString::number(0),0);
-        QString tmpstring = QString::number(tmphistindex);
-        axisX->append("<font color=\"red\">"+tmpstring+"</font>", tmphistindex);
-        axisX->append(QString::number(65535),65535);
-
-        chart->removeAxis(axisY);
-        delete axisY;
-        axisY = new QValueAxis();
-        axisY->setTickCount(3);
-        axisY->setLabelFormat("%d");
-        axisY->setRange(0,tmphistmax);
-
-        chart->addSeries(series);
-        chart->addAxis(axisX,Qt::AlignBottom);
-        chart->addAxis(axisY,Qt::AlignLeft);
-
-        ui->hist_chartview->setVisible(true);
-        ui->hist_chartview->update();
-        countB++;
+    for (int i=0;i<65536;++i) {
+       lineseries->append(QPointF(i,tmphistdata[i]));
     }
+    lineseries->setColor(Qt::black);
+
+    series = new QAreaSeries(lineseries);
+    series->setName("Histogram");
+    QPen pen(Qt::black);
+    pen.setWidth(1);
+    series->setPen(pen);
+    QBrush brush;
+    brush.setColor(Qt::black);//画刷颜色
+    brush.setStyle(Qt::SolidPattern);//画刷填充样式，斜网格
+    series->setBrush(brush);
+
+    chart->removeAxis(axisX);
+    delete axisX;
+    axisX = new QCategoryAxis();
+    axisX->setMin(0);
+    axisX->setMax(65535);
+    axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+    axisX->append(QString::number(0),0);
+    QString tmpstring = QString::number(tmphistindex);
+    axisX->append("<font color=\"red\">"+tmpstring+"</font>", tmphistindex);
+    axisX->append(QString::number(65535),65535);
+
+    chart->removeAxis(axisY);
+    delete axisY;
+    axisY = new QValueAxis();
+    axisY->setTickCount(3);
+    axisY->setLabelFormat("%d");
+    axisY->setRange(0,tmphistmax);
+
+    chart->addSeries(series);
+    chart->addAxis(axisX,Qt::AlignBottom);
+    chart->addAxis(axisY,Qt::AlignLeft);
+
+    ui->hist_chartview->setVisible(true);
+    ui->hist_chartview->update();
+    countB++;
+
+
 
     //histlock.unlock();
     //histlocked=false;
 
 }
+
+
+
 
