@@ -16,12 +16,13 @@ class threadA : public QObject
     Q_OBJECT
 public:
     threadA();
+    ~threadA();
     //int countA;
     QString src;
     std::random_device rd{};
     std::mt19937 gen{};
     std::normal_distribution<> d;
-    //unsigned short* srcimg;
+    //unsigned short* srcimg=nullptr;
 
     void working();
 

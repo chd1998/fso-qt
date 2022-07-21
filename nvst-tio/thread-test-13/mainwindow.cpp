@@ -14,7 +14,7 @@ QAreaSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-unsigned short *destimg=nullptr,*srcimg=nullptr,*destimg1=nullptr;
+//unsigned short *destimg=nullptr,*srcimg=nullptr,*destimg1=nullptr;
 uint MAXQUEUE=100,countA=0,countA1=0,countB=0,countB1=0;
 moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 uint fps0=0,fps1=0,fps=0;
@@ -117,7 +117,6 @@ void MainWindow::onesecPassed()
     t1 = timeT.toSecsSinceEpoch();   //将当前时间转为时间戳
     dt = t1-t0;
     ui->label_onesec->setAlignment(Qt::AlignCenter);
-    QString angle_sign=u8"°C";
     QString current_status =timeT.toString("yyyy-MM-dd hh:mm:ss")+" || Up: "+QString("%1").arg(dt,8,10,QLatin1Char('0'))+" secs. || FPS: "+QString("%1").arg(fps, 3, 10, QLatin1Char('0'))+" Frames/Sec.";
     ui->label_onesec->setText(current_status);
 }
@@ -175,12 +174,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::on_btn_start_A_clicked()
 {
 
+    startedA=true;
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
-    destimg=new unsigned short[imgX*imgY];
-    //if(srcimg != NULL)
-    //    delete[] srcimg;
-    //srcimg=new unsigned short[imgX*imgY];
+    //srcimg=new unsigned short[imgX*imgY]();
+    //destimg=new unsigned short[imgX*imgY]();
+    //destimg1=new unsigned short[imgX*imgY]();
+
     low=ui->lineEdit_low->text().toInt();
     high=ui->lineEdit_high->text().toInt();
     if( low >= high )
@@ -216,16 +216,22 @@ void MainWindow::on_btn_start_A_clicked()
         ui->btn_pause_A->setEnabled(true);
         ui->btn_resume_A->setEnabled(false);
         ui->btn_stopA->setEnabled(true);
-        startedA=true;
-        stoppedA=false;
-        pausedA=false;
+        ui->lineEdit_imgx->setEnabled(false);
+        ui->lineEdit_imgy->setEnabled(false);
+        ui->lineEdit_framerate->setEnabled(false);
+        ui->lineEdit_high->setEnabled(false);
+        ui->lineEdit_low->setEnabled(false);
+
 
     }else{
         ui->textEdit_StatusA->append("ThreadA start failed...");
-        startedA=false;
-        pausedA=false;
-        stoppedA=true;
+        //startedA=false;
+        //pausedA=false;
+        //stoppedA=true;
     }
+    startedA=true;
+    //stoppedA=false;
+    pausedA=false;
 
 }
 
@@ -257,13 +263,21 @@ void MainWindow::on_btn_resume_A_clicked()
 void MainWindow::on_btn_stopA_clicked()
 {
 
-    stoppedA=true;
+    //stoppedA=true;
     startedA=false;
+    //delete[] srcimg;
+    //delete[] destimg;
+
     ui->textEdit_StatusA->append("ThreadA stopped...");
     ui->btn_start_A->setEnabled(true);
     ui->btn_pause_A->setEnabled(false);
     ui->btn_resume_A->setEnabled(false);
     ui->btn_stopA->setEnabled(false);
+    ui->lineEdit_imgx->setEnabled(true);
+    ui->lineEdit_imgy->setEnabled(true);
+    ui->lineEdit_framerate->setEnabled(true);
+    ui->lineEdit_high->setEnabled(true);
+    ui->lineEdit_low->setEnabled(true);
 
     liveTimer->stop();
     thread1->disconnect();
@@ -276,13 +290,13 @@ void MainWindow::on_btn_stopA_clicked()
         qDebug()<<"Waiting for threadA to stop...";
     }
     thread1->deleteLater();
-    delete[] destimg;
+    qDebug()<<"A-stopped";
     imgQueue=moodycamel::ConcurrentQueue<unsigned short*>();
  }
 
 void MainWindow::on_btn_start_B_clicked()
 {
-    if(!stoppedA)
+    if(startedA && !pausedA)
     {
         startedB=true;
         stoppedB=false;
@@ -291,7 +305,7 @@ void MainWindow::on_btn_start_B_clicked()
         //imgY=ui->lineEdit_imgy->text().toInt();
         //if(destimg != NULL)
         //    delete[] destimg;
-        //destimg=new unsigned short[imgX*imgY];
+        //destimg1=new unsigned short[imgX*imgY];
         histRate=ui->lineEdit_histrate->text().toInt();
         thread2 = new QThread( );
         taskB = new threadB();
@@ -315,6 +329,8 @@ void MainWindow::on_btn_start_B_clicked()
             ui->btn_pause_B->setEnabled(true);
             ui->btn_resume_B->setEnabled(false);
             ui->btn_stopB->setEnabled(true);
+
+            ui->lineEdit_histrate->setEnabled(false);
 
         }else{
             ui->textEdit_StatusB->append("ThreadB start failed...");
@@ -362,24 +378,20 @@ void MainWindow::on_btn_stopB_clicked()
     ui->btn_resume_B->setEnabled(false);
     ui->btn_stopB->setEnabled(false);
 
-    //qDebug()<<"Enter finishB --- 01";
+    ui->lineEdit_histrate->setEnabled(true);
+
     thread2->disconnect();
-    //qDebug()<<"Enter finishB --- 02";
     thread2->quit();
-    //qDebug()<<"Enter finishB --- 03";
     //thread2->requestInterruption();
     thread2->wait();
-    //qDebug()<<"Enter finishB --- 04";
     while(!thread2->isFinished())
     {
         QCoreApplication::processEvents();
         qDebug()<<"Waiting for threadB to stop...";
     }
-    //qDebug()<<"Enter finishB --- 05";
     thread2->deleteLater();
-    //qDebug()<<"Enter finishB --- 06";
     thread2=nullptr;
-    //qDebug()<<"Enter finishB --- 07";
+    //delete[] destimg1;
 }
 
 /*void MainWindow::finishB()
@@ -407,6 +419,12 @@ void MainWindow::on_btn_exit_clicked()
 {
     ui->textEdit_StatusA->append("Waiting for ThreadA to stop...");
     ui->textEdit_StatusB->append("Waiting for ThreadB to stop...");
+    //if(srcimg != NULL )
+    //    delete[] srcimg;
+    //if(destimg != NULL )
+        //delete[] destimg;
+    //if(destimg1 != NULL )
+        //delete[] destimg1;
     closeP();
     QElapsedTimer t;
     t.start();
@@ -418,17 +436,17 @@ void MainWindow::on_btn_exit_clicked()
 
 void MainWindow::closeP()
 {
-    stoppedA=true;
-    stoppedB=true;
+    startedA=false;
+    startedB=false;
     //paused=true;
     qDebug()<<"Closing...";
-    ui->textEdit_StatusA->append("Pls wait for 1 sec. for closing thread...");
-    ui->textEdit_StatusB->append("Pls wait for 1 sec. for closing thread...");
-    if(pausedA)
-        lockA.unlock();
-    if(pausedB)
-        lockB.unlock();
-    if(startedA){
+    ui->textEdit_StatusA->append("Closing thread, pls wait...");
+    ui->textEdit_StatusB->append("Closing thread, pls wait...");
+    //if(pausedA)
+        //lockA.unlock();
+    //if(pausedB)
+        //lockB.unlock();
+    if(thread1->isRunning()){
         thread1->disconnect();
         thread1->requestInterruption();
         thread1->quit();
@@ -441,7 +459,7 @@ void MainWindow::closeP()
             QCoreApplication::processEvents();
         }
     }
-    if(startedB){
+    if(thread2->isRunning()){
         thread2->disconnect();
         thread2->requestInterruption();
         thread2->quit();
@@ -456,38 +474,40 @@ void MainWindow::closeP()
     }
     pausedA=false;
     pausedB=false;
-    startedA=false;
-    startedB=false;
+    stoppedA=true;
+    stoppedB=true;
 }
 
 void MainWindow::updateImg()
 {
 
+    unsigned short *destimg=new unsigned short[imgX*imgY]();
+    if(startedA && !pausedA)
+    {
 
-        if(startedA && !pausedA)
+        grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
+        //destimg1=new unsigned short[imgX*imgY];
+        if(imgQueue.try_dequeue(destimg))
         {
-            grayimage16 = new QImage(imgX,imgY,QImage::Format_Grayscale16);
-            //destimg1=new unsigned short[imgX*imgY];
-            if(imgQueue.try_dequeue(destimg))
-            {
-                *grayimage16 = QImage(reinterpret_cast< uchar* >( destimg ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
-                imgscene->clear();
-                ui->imgView->update();
-                item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
-                imgscene->addItem(item);
-                imgscene->setSceneRect(QRectF(0, 0, imgY, imgX));
-                ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
-                ui->imgView->update();
-            }else
-            {
-                ui->textEdit_StatusA->append("Image enqueue stopped, pls wait...");
-            }
-            countA++;
-            fps1++;
-            delete grayimage16;
-            //delete[] destimg1;
+            ui->textEdit_StatusA->append("Image showing...");
+            *grayimage16 = QImage(reinterpret_cast< uchar* >( destimg ),imgX,imgY,QImage::Format_Grayscale16).scaled(imgscene->width(),imgscene->height());
+            imgscene->clear();
+            ui->imgView->update();
+            item = new QGraphicsPixmapItem(QPixmap::fromImage(*grayimage16));
+            imgscene->addItem(item);
+            imgscene->setSceneRect(QRectF(0, 0, imgY, imgX));
+            ui->imgView->fitInView(imgscene->sceneRect(), Qt::KeepAspectRatio);
+            ui->imgView->update();
+        }else
+        {
+            ui->textEdit_StatusA->append("Image dequeue failed in display module, pls wait...");
         }
+        countA++;
+        fps1++;
+        delete grayimage16;
 
+    }
+    delete[] destimg;
 }
 
 void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphistindex)

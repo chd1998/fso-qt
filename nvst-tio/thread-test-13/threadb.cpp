@@ -20,26 +20,27 @@ threadB::~threadB()
 
 void threadB::working()
 {
-    //destimg=new unsigned short[imgX*imgY];
+    unsigned short *destimg1=new unsigned short[imgX*imgY]();
     while(startedB)
     {
+
         QElapsedTimer t;
         t.start();
 
         lockB.lock();
-        if(pausedB || pausedA)
+        if(pausedB)
             pauseCondB.wait(&lockB);
         lockB.unlock();
 
         uint imglen=imgX*imgY;
 
-        if(imgQueue.try_dequeue(destimg))
+        if(imgQueue.try_dequeue(destimg1))
         {
             histmax=0;
             QVector<uint>vechistdata(65536,0);
             for(uint i=0;i<imglen;++i)
             {
-                int idx=destimg[i];
+                int idx=destimg1[i];
                 ++vechistdata[idx];
                 if(vechistdata[idx]>histmax)
                 {
@@ -48,7 +49,7 @@ void threadB::working()
                 }
            }
             emit fromB(src,countB,"Image dequeued in Hist Calc...");
-            if(!stoppedA || !pausedA)
+            if(startedA || !pausedA)
                 emit histReady(vechistdata,histmax,histindex);
             QVector<uint> nullvec;
             vechistdata.swap(nullvec);
@@ -64,9 +65,11 @@ void threadB::working()
          while(t.elapsed()<histRate)
              QCoreApplication::processEvents();
 
+
     }
+    delete[] destimg1;
     qDebug()<<"ThreadB finished...";
-    //delete[] destimg;
+
     //emit finished();
 }
 

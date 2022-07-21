@@ -25,7 +25,7 @@ public:
     void working();
     void calcHist();
     //void finished();
-    //unsigned short* destimg;
+    //unsigned short* destimg1=nullptr;
 
     //bool histfinished;
 

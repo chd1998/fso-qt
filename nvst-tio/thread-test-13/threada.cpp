@@ -7,6 +7,7 @@ threadA::threadA()
     countA=0;
     countA1=0;
     src="A";
+    //srcimg=new unsigned short[imgX*imgY]();
     //std::default_random_engine gen;
     //double mu{32768}, sigma{9000};
     //std::normal_distribution<> d{mu, sigma};
@@ -16,19 +17,30 @@ threadA::threadA()
 
 }
 
+threadA::~threadA()
+{
+    //delete[] srcimg;
+}
+
 void threadA::working()
 {
-    srcimg=new unsigned short[imgX*imgY]();
-    while(!stoppedA)
+
+    qDebug()<<"A-started";
+    unsigned short *srcimg=new unsigned short[imgX*imgY]();
+    while(startedA)
     {
+
         QElapsedTimer t;
         t.start();
 
         lockA.lock();
         if(pausedA)
+        {
+            qDebug()<<"A-paused";
             pauseCondA.wait(&lockA);
+        }
         lockA.unlock();
-
+        srcimg=new unsigned short[imgX*imgY]();
         for(uint i = 0 ;i < imgX*imgY ;i++)
         {
                 //unsigned short randnum=QRandomGenerator::global()->bounded(low,high);
@@ -39,7 +51,7 @@ void threadA::working()
             countA++;
             //emit imgReady();
             emit fromA(src,countA,"Image enqueued...");
-            //qDebug()<<"Enqueue count: "<<countA<<" imgQueue size: "<<imgQueue.size_approx();
+            qDebug()<<"Enqueue count: "<<countA<<" imgQueue size: "<<imgQueue.size_approx();
             //countA1++;
         }else
         {
@@ -57,10 +69,13 @@ void threadA::working()
         {
             QCoreApplication::processEvents();
         }
+        //if(!startedA)
+            //break;
 
     }
 
     delete[] srcimg;
+    qDebug()<<"ThreadA finished";
     //emit finished();
 }
 
