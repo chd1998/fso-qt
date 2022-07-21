@@ -7,6 +7,7 @@ threadA::threadA()
     countA=0;
     countA1=0;
     src="A";
+    //unsigned short *srcimg;
     //srcimg=new unsigned short[imgX*imgY]();
     //std::default_random_engine gen;
     //double mu{32768}, sigma{9000};
@@ -26,7 +27,8 @@ void threadA::working()
 {
 
     qDebug()<<"A-started";
-    unsigned short *srcimg=new unsigned short[imgX*imgY]();
+    unsigned short *srcimg;
+    srcimg=new unsigned short[imgX*imgY]();
     while(startedA)
     {
 
@@ -40,7 +42,7 @@ void threadA::working()
             pauseCondA.wait(&lockA);
         }
         lockA.unlock();
-        srcimg=new unsigned short[imgX*imgY]();
+
         for(uint i = 0 ;i < imgX*imgY ;i++)
         {
                 //unsigned short randnum=QRandomGenerator::global()->bounded(low,high);
@@ -71,7 +73,7 @@ void threadA::working()
         }
         //if(!startedA)
             //break;
-
+        //delete[] srcimg;
     }
 
     delete[] srcimg;

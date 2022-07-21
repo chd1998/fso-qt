@@ -22,7 +22,7 @@ public:
     std::random_device rd{};
     std::mt19937 gen{};
     std::normal_distribution<> d;
-    //unsigned short* srcimg=nullptr;
+    unsigned short* srcimg=nullptr;
 
     void working();
 
