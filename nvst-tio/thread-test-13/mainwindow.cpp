@@ -14,7 +14,7 @@ QAreaSeries *series = nullptr;
 QCategoryAxis *axisX = nullptr;
 QValueAxis *axisY = nullptr;
 QChart *chart= nullptr;
-//unsigned short *destimg=nullptr,*srcimg=nullptr,*destimg1=nullptr;
+unsigned short *destimg=nullptr,*srcimg=nullptr,*destimg1=nullptr;
 uint MAXQUEUE=100,countA=0,countA1=0,countB=0,countB1=0;
 moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 uint fps0=0,fps1=0,fps=0;
@@ -168,7 +168,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     closeP();
     while(t.elapsed()<2000)
         QCoreApplication::processEvents();
-    QCoreApplication::exit(0);
+    qApp->exit(0);
 }
 
 void MainWindow::on_btn_start_A_clicked()
@@ -177,9 +177,9 @@ void MainWindow::on_btn_start_A_clicked()
     startedA=true;
     imgX=ui->lineEdit_imgx->text().toInt();
     imgY=ui->lineEdit_imgy->text().toInt();
-    //srcimg=new unsigned short[imgX*imgY]();
-    //destimg=new unsigned short[imgX*imgY]();
-    //destimg1=new unsigned short[imgX*imgY]();
+    srcimg=new unsigned short[imgX*imgY]{0};
+    destimg=new unsigned short[imgX*imgY]{0};
+
 
     low=ui->lineEdit_low->text().toInt();
     high=ui->lineEdit_high->text().toInt();
@@ -280,18 +280,22 @@ void MainWindow::on_btn_stopA_clicked()
     ui->lineEdit_low->setEnabled(true);
 
     liveTimer->stop();
-    thread1->disconnect();
-    thread1->quit();
-    //thread1->requestInterruption();
-    thread1->wait();
-    while(thread1->isRunning() )
+    delete[] destimg;
+    if(thread1->isRunning())
     {
-        QCoreApplication::processEvents();
-        qDebug()<<"Waiting for threadA to stop...";
+
+        thread1->quit();
+        thread1->wait();
+        while(thread1->isRunning() )
+        {
+            QCoreApplication::processEvents();
+            qDebug()<<"Waiting for threadA to stop...";
+        }
+        thread1->deleteLater();
     }
-    thread1->deleteLater();
     qDebug()<<"A-stopped";
     imgQueue=moodycamel::ConcurrentQueue<unsigned short*>();
+
  }
 
 void MainWindow::on_btn_start_B_clicked()
@@ -305,7 +309,7 @@ void MainWindow::on_btn_start_B_clicked()
         //imgY=ui->lineEdit_imgy->text().toInt();
         //if(destimg != NULL)
         //    delete[] destimg;
-        //destimg1=new unsigned short[imgX*imgY];
+        destimg1=new unsigned short[imgX*imgY];
         histRate=ui->lineEdit_histrate->text().toInt();
         thread2 = new QThread( );
         taskB = new threadB();
@@ -380,57 +384,32 @@ void MainWindow::on_btn_stopB_clicked()
 
     ui->lineEdit_histrate->setEnabled(true);
 
-    thread2->disconnect();
-    thread2->quit();
-    //thread2->requestInterruption();
-    thread2->wait();
-    while(!thread2->isFinished())
+    if(thread2->isRunning())
     {
-        QCoreApplication::processEvents();
-        qDebug()<<"Waiting for threadB to stop...";
+        thread2->quit();
+        thread2->wait();
+        while(!thread2->isFinished())
+        {
+            QCoreApplication::processEvents();
+            qDebug()<<"Waiting for threadB to stop...";
+        }
+        thread2->deleteLater();
+        thread2=nullptr;
     }
-    thread2->deleteLater();
-    thread2=nullptr;
     //delete[] destimg1;
 }
 
-/*void MainWindow::finishB()
-{
-    qDebug()<<"Enter finishB...";
-    //thread2->disconnect();
-    thread2->quit();
-    //thread2->requestInterruption();
-    thread2->wait();
-    while(thread2->isRunning())
-    {
-        QCoreApplication::processEvents();
-        qDebug()<<"Waiting for threadB to stop...";
-    }
-    thread2->deleteLater();
-    thread2=nullptr;
-}*/
-
-/*void MainWindow::on_btn_stopB_pressed()
-{
-
-}*/
 
 void MainWindow::on_btn_exit_clicked()
 {
     ui->textEdit_StatusA->append("Waiting for ThreadA to stop...");
     ui->textEdit_StatusB->append("Waiting for ThreadB to stop...");
-    //if(srcimg != NULL )
-    //    delete[] srcimg;
-    //if(destimg != NULL )
-        //delete[] destimg;
-    //if(destimg1 != NULL )
-        //delete[] destimg1;
     closeP();
     QElapsedTimer t;
     t.start();
     while(t.elapsed()<2000)
         QCoreApplication::processEvents();
-    QCoreApplication::exit(0);
+    qApp->exit(0);
 }
 
 
@@ -446,9 +425,8 @@ void MainWindow::closeP()
         //lockA.unlock();
     //if(pausedB)
         //lockB.unlock();
-    if(thread1->isRunning()){
-        thread1->disconnect();
-        thread1->requestInterruption();
+
+    if(startedA){
         thread1->quit();
         thread1->wait();
         //QElapsedTimer t;
@@ -459,9 +437,7 @@ void MainWindow::closeP()
             QCoreApplication::processEvents();
         }
     }
-    if(thread2->isRunning()){
-        thread2->disconnect();
-        thread2->requestInterruption();
+    if(startedB){
         thread2->quit();
         thread2->wait();
         //QElapsedTimer t;
@@ -481,7 +457,7 @@ void MainWindow::closeP()
 void MainWindow::updateImg()
 {
 
-    unsigned short *destimg=new unsigned short[imgX*imgY]();
+    //unsigned short *destimg=new unsigned short[imgX*imgY]();
     if(startedA && !pausedA)
     {
 
@@ -507,7 +483,7 @@ void MainWindow::updateImg()
         delete grayimage16;
 
     }
-    delete[] destimg;
+    //delete[] destimg;
 }
 
 void MainWindow::updateHist(QVector<uint> tmphistdata,uint tmphistmax,uint tmphistindex)

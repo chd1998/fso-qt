@@ -15,12 +15,12 @@ threadB::threadB()
 
 threadB::~threadB()
 {
-
+    delete[] destimg1;
 }
 
 void threadB::working()
 {
-    unsigned short *destimg1=new unsigned short[imgX*imgY]();
+    //unsigned short *destimg1=new unsigned short[imgX*imgY]();
     while(startedB)
     {
 
@@ -34,7 +34,7 @@ void threadB::working()
 
         uint imglen=imgX*imgY;
 
-        if(imgQueue.try_dequeue(destimg1))
+        if(imgQueue.try_dequeue(destimg1) && startedA)
         {
             histmax=0;
             QVector<uint>vechistdata(65536,0);
@@ -67,7 +67,7 @@ void threadB::working()
 
 
     }
-    delete[] destimg1;
+    //delete[] destimg1;
     qDebug()<<"ThreadB finished...";
 
     //emit finished();

@@ -20,15 +20,15 @@ threadA::threadA()
 
 threadA::~threadA()
 {
-    //delete[] srcimg;
+    delete[] srcimg;
 }
 
 void threadA::working()
 {
 
     qDebug()<<"A-started";
-    unsigned short *srcimg;
-    srcimg=new unsigned short[imgX*imgY]();
+    //unsigned short *srcimg;
+    //srcimg=new unsigned short[imgX*imgY]();
     while(startedA)
     {
 
@@ -76,8 +76,8 @@ void threadA::working()
         //delete[] srcimg;
     }
 
-    delete[] srcimg;
-    qDebug()<<"ThreadA finished";
+    //delete[] srcimg;
+    qDebug()<<"ThreadA finished...";
     //emit finished();
 }
 

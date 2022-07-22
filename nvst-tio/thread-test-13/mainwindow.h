@@ -26,7 +26,7 @@ extern QAreaSeries *series;
 extern QCategoryAxis *axisX ;
 extern QValueAxis *axisY ;
 extern QChart *chart;
-//extern unsigned short *srcimg,*destimg,*destimg1;
+extern unsigned short *srcimg,*destimg,*destimg1;
 extern moodycamel::ConcurrentQueue<unsigned short*> imgQueue;
 extern uint MAXQUEUE,countA,countA1,countB,countB1;
 extern long t0,t1;
