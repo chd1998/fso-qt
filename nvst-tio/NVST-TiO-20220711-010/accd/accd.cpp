@@ -112,6 +112,10 @@ void aCCD::run()
         if(live)
         {
             getData();
+        }else
+        {
+            if(savefits)
+                emit stop_Acq();
         }
 
     }

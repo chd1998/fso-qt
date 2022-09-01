@@ -392,6 +392,9 @@ void MainWindow::drawRect(double ea,double eb){
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     qDebug()<<event;
+    emit stopACQ();
+    while(savefits)
+        QCoreApplication::processEvents();
     savefits=false;
     live=false;
     opened=false;
@@ -706,10 +709,11 @@ void MainWindow::stopACQ(){
     ui->textEdit_status->append("Waiting for Saving Data...");
     QElapsedTimer t1;
     t1.start();
-    while(t1.elapsed()<5000)
+    //while(t1.elapsed()<5000)
+    while(true)
     {
         QCoreApplication::processEvents();
-        if(continousACQ ){
+        /*(if(continousACQ ){
             if(fpre=="T" && !localsave)
                 break;
         }
@@ -719,10 +723,10 @@ void MainWindow::stopACQ(){
             {
                 break;
             }
-        }
+        }*/
 
         //if((fpre=="FLAT" && (fserialNo % 2000)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % 1000)==0 && fserialNo>0))
-        if((fpre=="FLAT" && (fserialNo % datanum)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % datanum)==0 && fserialNo>0))
+        if(((fserialNo % datanum)==0 && fserialNo>0) || (fpre=="FLAT" && (fserialNo % datanum)==0 && fserialNo>0) || (fpre=="dark" && (fserialNo % datanum)==0 && fserialNo>0))
         {
             break;
         }
